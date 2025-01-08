@@ -9,9 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_appauth:
+  flutter_appauth: any
   http:
   flutter_dotenv:
+  flutter_bloc:
+  flutter_secure_storage:
 
 dev_dependencies:
   flutter_test:
@@ -20,6 +22,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
-assets:
-  - .env
+  assets:
+    - .env

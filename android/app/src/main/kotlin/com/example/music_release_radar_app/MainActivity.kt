@@ -1,4 +1,4 @@
-package com.example.music_release_radar_app
+package com.windschief.music_release_radar_app
 
 import io.flutter.embedding.android.FlutterActivity
 
