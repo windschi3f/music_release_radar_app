@@ -66,4 +66,9 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthenticationFailed(e.toString()));
     }
   }
+
+  Future<void> logout() async {
+    await _tokenService.deleteTokens();
+    emit(AuthenticationRequired());
+  }
 }

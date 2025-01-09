@@ -6,7 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
 import 'package:music_release_radar_app/core/token_service.dart';
 import 'package:music_release_radar_app/auth/auth_page.dart';
+import 'package:music_release_radar_app/spotify/model/spotify_user.dart';
 import 'package:music_release_radar_app/spotify/spotify_client.dart';
+import 'package:music_release_radar_app/tasks/task_page.dart';
+import 'package:music_release_radar_app/tasks/tasks_cubit.dart';
 
 Future<void> main() async {
   await dotenv.load();
@@ -37,7 +40,18 @@ class MyApp extends StatelessWidget {
         GoRoute(
           path: '/',
           builder: (context, state) => const AuthPage(),
-        )
+        ),
+        GoRoute(
+          path: '/tasks',
+          builder: (context, state) => BlocProvider(
+            create: (context) => TasksCubit(
+              spotifyClient: spotifyClient,
+              tokenService: tokenService,
+              user: state.extra as SpotifyUser,
+            ),
+            child: const TaskPage(),
+          ),
+        ),
       ],
     );
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
 
 class AuthPage extends StatelessWidget {
@@ -13,6 +14,8 @@ class AuthPage extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
           );
+        } else if (state is Authenticated) {
+          context.go('/tasks', extra: state.user);
         }
       },
       builder: (context, state) => Scaffold(
@@ -25,16 +28,6 @@ class AuthPage extends StatelessWidget {
     if (state is AuthLoading) {
       return const Center(
         child: CircularProgressIndicator(),
-      );
-    } else if (state is Authenticated) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Welcome ${state.user.displayName}!'),
-            Text('Followers: ${state.user.followerCount}'),
-          ],
-        ),
       );
     } else {
       return Center(
