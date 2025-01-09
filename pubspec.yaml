@@ -14,6 +14,7 @@ dependencies:
   flutter_dotenv:
   flutter_bloc:
   flutter_secure_storage:
+  go_router:
 
 dev_dependencies:
   flutter_test:
