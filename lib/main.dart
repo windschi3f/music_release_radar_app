@@ -3,28 +3,29 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:music_release_radar_app/auth_cubit.dart';
+import 'package:music_release_radar_app/core/token_service.dart';
 import 'package:music_release_radar_app/spotify/spotify_client.dart';
 
 Future<void> main() async {
   await dotenv.load();
 
   final spotifyClient = SpotifyClient();
-  final secureStorage = const FlutterSecureStorage();
+  final tokenService = TokenService(FlutterSecureStorage());
 
   runApp(MyApp(
     spotifyClient: spotifyClient,
-    secureStorage: secureStorage,
+    tokenService: tokenService,
   ));
 }
 
 class MyApp extends StatelessWidget {
   final SpotifyClient spotifyClient;
-  final FlutterSecureStorage secureStorage;
+  final TokenService tokenService;
 
   const MyApp({
     super.key,
     required this.spotifyClient,
-    required this.secureStorage,
+    required this.tokenService,
   });
 
   @override
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) => AuthCubit(
             spotifyClient: spotifyClient,
-            secureStorage: secureStorage,
+            tokenService: tokenService,
           )..checkAuthStatus(),
         ),
       ],

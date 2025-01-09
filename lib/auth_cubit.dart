@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:music_release_radar_app/core/token_service.dart';
 import 'package:music_release_radar_app/spotify/access_token_expired_exception.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_user.dart';
 import 'package:music_release_radar_app/spotify/spotify_client.dart';
@@ -9,21 +9,22 @@ part 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final SpotifyClient _spotifyClient;
-  final FlutterSecureStorage _secureStorage;
+  final TokenService _tokenService;
 
   AuthCubit({
     required SpotifyClient spotifyClient,
-    required FlutterSecureStorage secureStorage,
+    required TokenService tokenService,
   })  : _spotifyClient = spotifyClient,
-        _secureStorage = secureStorage,
+        _tokenService = tokenService,
         super(AuthInitial());
 
   Future<void> checkAuthStatus() async {
     emit(AuthLoading());
 
     try {
-      final accessToken = await _secureStorage.read(key: 'accessToken');
-      final refreshToken = await _secureStorage.read(key: 'refreshToken');
+      final tokens = await _tokenService.retrieveTokens();
+      final accessToken = tokens[TokenService.accessTokenKey];
+      final refreshToken = tokens[TokenService.refreshTokenKey];
 
       if (accessToken == null || refreshToken == null) {
         emit(AuthenticationRequired());
@@ -37,7 +38,8 @@ class AuthCubit extends Cubit<AuthState> {
       } on AccessTokenExpiredException {
         final tokenResponse =
             await _spotifyClient.refreshAccessToken(refreshToken);
-        _saveTokens(tokenResponse.accessToken!, tokenResponse.refreshToken);
+        await _tokenService.saveTokens(
+            tokenResponse.accessToken!, tokenResponse.refreshToken);
 
         final user =
             await _spotifyClient.getUserData(tokenResponse.accessToken!);
@@ -45,7 +47,7 @@ class AuthCubit extends Cubit<AuthState> {
         return;
       }
     } catch (e) {
-      await _clearTokens();
+      await _tokenService.deleteTokens();
       emit(AuthenticationRequired());
     }
   }
@@ -55,24 +57,13 @@ class AuthCubit extends Cubit<AuthState> {
 
     try {
       final response = await _spotifyClient.authenticate();
-      _saveTokens(response.accessToken!, response.refreshToken!);
+      await _tokenService.saveTokens(
+          response.accessToken!, response.refreshToken!);
 
       final user = await _spotifyClient.getUserData(response.accessToken!);
       emit(Authenticated(user));
     } catch (e) {
       emit(AuthenticationFailed(e.toString()));
     }
-  }
-
-  Future<void> _saveTokens(String accessToken, String? refreshToken) async {
-    await _secureStorage.write(key: 'accessToken', value: accessToken);
-    if (refreshToken != null) {
-      await _secureStorage.write(key: 'refreshToken', value: refreshToken);
-    }
-  }
-
-  Future<void> _clearTokens() async {
-    await _secureStorage.delete(key: 'accessToken');
-    await _secureStorage.delete(key: 'refreshToken');
   }
 }
