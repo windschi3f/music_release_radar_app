@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:music_release_radar_app/core/token_service.dart';
-import 'package:music_release_radar_app/spotify/access_token_expired_exception.dart';
+import 'package:music_release_radar_app/core/unauthorized_exception.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_user.dart';
 import 'package:music_release_radar_app/spotify/spotify_client.dart';
 
@@ -35,7 +35,7 @@ class AuthCubit extends Cubit<AuthState> {
         final user = await _spotifyClient.getUserData(accessToken);
         emit(Authenticated(user));
         return;
-      } on AccessTokenExpiredException {
+      } on UnauthorizedException {
         final tokenResponse =
             await _spotifyClient.refreshAccessToken(refreshToken);
         await _tokenService.saveTokens(

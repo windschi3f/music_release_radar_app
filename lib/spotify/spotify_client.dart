@@ -2,7 +2,7 @@ import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:music_release_radar_app/spotify/access_token_expired_exception.dart';
+import 'package:music_release_radar_app/core/unauthorized_exception.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_user.dart';
 import 'package:music_release_radar_app/spotify/spotify_client_exception.dart';
 
@@ -54,14 +54,14 @@ class SpotifyClient {
         final userData = jsonDecode(response.body) as Map<String, dynamic>;
         return SpotifyUser.fromJson(userData);
       } else if (response.statusCode == 401) {
-        throw AccessTokenExpiredException();
+        throw UnauthorizedException();
       } else {
         throw SpotifyClientException(
             'Failed to fetch Spotify user data (${response.statusCode}): ${response.body}');
       }
     } on FormatException catch (e) {
       throw SpotifyClientException('Invalid response format: $e');
-    } on AccessTokenExpiredException {
+    } on UnauthorizedException {
       rethrow;
     } catch (e) {
       throw SpotifyClientException('Unknown error occurred: $e');
