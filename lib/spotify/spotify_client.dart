@@ -43,6 +43,20 @@ class SpotifyClient {
     );
   }
 
+  Future<TokenResponse> refreshAccessToken(String refreshToken) async {
+    return await _appAuth.token(
+      TokenRequest(
+        _clientId,
+        _redirectUri,
+        serviceConfiguration: AuthorizationServiceConfiguration(
+          authorizationEndpoint: _authorizationEndpoint,
+          tokenEndpoint: _tokenEndpoint,
+        ),
+        refreshToken: refreshToken,
+      ),
+    );
+  }
+
   Future<SpotifyUser> getUserData(String accessToken) async {
     try {
       final response = await http.get(
@@ -66,19 +80,5 @@ class SpotifyClient {
     } catch (e) {
       throw SpotifyClientException('Unknown error occurred: $e');
     }
-  }
-
-  Future<TokenResponse> refreshAccessToken(String refreshToken) async {
-    return await _appAuth.token(
-      TokenRequest(
-        _clientId,
-        _redirectUri,
-        serviceConfiguration: AuthorizationServiceConfiguration(
-          authorizationEndpoint: _authorizationEndpoint,
-          tokenEndpoint: _tokenEndpoint,
-        ),
-        refreshToken: refreshToken,
-      ),
-    );
   }
 }
