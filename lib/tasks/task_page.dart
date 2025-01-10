@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
+import 'package:music_release_radar_app/spotify/model/spotify_user.dart';
+import 'package:music_release_radar_app/tasks/tasks_cubit.dart';
+import 'package:music_release_radar_app/tasks/task.dart';
 
 class TaskPage extends StatelessWidget {
-  const TaskPage({super.key});
+  final SpotifyUser user;
+
+  const TaskPage({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -15,19 +20,66 @@ class TaskPage extends StatelessWidget {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('Tasks'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () => context.read<AuthCubit>().logout(),
+        appBar: _buildAppBar(context),
+        body: _buildBody(context),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      title: Text('Tasks'),
+      actions: [
+        PopupMenuButton<String>(
+          onSelected: (String result) {
+            if (result == 'logout') {
+              context.read<AuthCubit>().logout();
+            }
+          },
+          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+            const PopupMenuItem<String>(
+              value: 'logout',
+              child: Text('Logout'),
             ),
           ],
+          child: user.images.isNotEmpty
+              ? CircleAvatar(
+                  backgroundImage: NetworkImage(user.images.first.url),
+                )
+              : const Icon(Icons.account_circle),
         ),
-        body: Center(
-          child: Text('Tasks'),
-        ),
-      ),
+      ],
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    context.read<TasksCubit>().fetchTasks();
+    return BlocBuilder<TasksCubit, TasksState>(
+      builder: (context, state) {
+        if (state is TasksLoading) {
+          return CircularProgressIndicator();
+        } else if (state is TasksSuccess) {
+          return _buildTasksView(context, state.tasks);
+        } else {
+          return Text("Error loading tasks");
+        }
+      },
+    );
+  }
+
+  Widget _buildTasksView(BuildContext context, List<Task> tasks) {
+    return ListView.builder(
+      itemCount: tasks.length,
+      itemBuilder: (context, index) {
+        final task = tasks[index];
+        return ListTile(
+          title: Text(task.name),
+          trailing: IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {},
+          ),
+        );
+      },
     );
   }
 }
