@@ -8,29 +8,34 @@ import 'package:music_release_radar_app/core/token_service.dart';
 import 'package:music_release_radar_app/auth/auth_page.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_user.dart';
 import 'package:music_release_radar_app/spotify/spotify_client.dart';
-import 'package:music_release_radar_app/tasks/task_page.dart';
+import 'package:music_release_radar_app/tasks/task_client.dart';
 import 'package:music_release_radar_app/tasks/tasks_cubit.dart';
+import 'package:music_release_radar_app/tasks/tasks_page.dart';
 
 Future<void> main() async {
   await dotenv.load();
 
   final spotifyClient = SpotifyClient();
   final tokenService = TokenService(FlutterSecureStorage());
+  final taskClient = TaskClient();
 
   runApp(MyApp(
     spotifyClient: spotifyClient,
     tokenService: tokenService,
+    taskClient: taskClient,
   ));
 }
 
 class MyApp extends StatelessWidget {
   final SpotifyClient spotifyClient;
   final TokenService tokenService;
+  final TaskClient taskClient;
 
   const MyApp({
     super.key,
     required this.spotifyClient,
     required this.tokenService,
+    required this.taskClient,
   });
 
   @override
@@ -43,14 +48,18 @@ class MyApp extends StatelessWidget {
         ),
         GoRoute(
           path: '/tasks',
-          builder: (context, state) => BlocProvider(
-            create: (context) => TasksCubit(
-              spotifyClient: spotifyClient,
-              tokenService: tokenService,
-              user: state.extra as SpotifyUser,
-            ),
-            child: const TaskPage(),
-          ),
+          builder: (context, state) {
+            final user = state.extra as SpotifyUser;
+            return BlocProvider(
+              create: (context) => TasksCubit(
+                spotifyClient: spotifyClient,
+                tokenService: tokenService,
+                taskClient: taskClient,
+                authCubit: context.read<AuthCubit>(),
+              ),
+              child: TasksPage(user: user),
+            );
+          },
         ),
       ],
     );
