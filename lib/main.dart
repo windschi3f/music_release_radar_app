@@ -7,6 +7,8 @@ import 'package:music_release_radar_app/auth/auth_cubit.dart';
 import 'package:music_release_radar_app/core/token_service.dart';
 import 'package:music_release_radar_app/auth/auth_page.dart';
 import 'package:music_release_radar_app/spotify/spotify_client.dart';
+import 'package:music_release_radar_app/tasks/form/artists_selection_page.dart';
+import 'package:music_release_radar_app/tasks/form/task_form_cubit.dart';
 import 'package:music_release_radar_app/tasks/task_client.dart';
 import 'package:music_release_radar_app/tasks/tasks_cubit.dart';
 import 'package:music_release_radar_app/tasks/tasks_page.dart';
@@ -45,19 +47,40 @@ class MyApp extends StatelessWidget {
           path: '/',
           builder: (context, state) => const AuthPage(),
         ),
-        GoRoute(
-          path: '/tasks',
-          builder: (context, state) {
-            return BlocProvider(
-              create: (context) => TasksCubit(
-                spotifyClient: spotifyClient,
-                tokenService: tokenService,
-                taskClient: taskClient,
-                authCubit: context.read<AuthCubit>(),
-              ),
-              child: TasksPage(),
+        ShellRoute(
+          builder: (context, state, child) {
+            return MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (context) => TasksCubit(
+                    spotifyClient: spotifyClient,
+                    tokenService: tokenService,
+                    taskClient: taskClient,
+                    authCubit: context.read<AuthCubit>(),
+                  ),
+                ),
+                BlocProvider(
+                  create: (context) => TaskFormCubit(
+                    spotifyClient: spotifyClient,
+                    tokenService: tokenService,
+                    authCubit: context.read<AuthCubit>(),
+                  ),
+                ),
+              ],
+              child: child,
             );
           },
+          routes: [
+            GoRoute(
+              path: '/tasks',
+              builder: (context, state) => TasksPage(),
+              routes: [
+                GoRoute(
+                    path: 'form/artists-selection',
+                    builder: (context, state) => const ArtistsSelectionPage()),
+              ],
+            ),
+          ],
         ),
       ],
     );

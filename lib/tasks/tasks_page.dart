@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
+import 'package:music_release_radar_app/tasks/form/task_form_cubit.dart';
 import 'package:music_release_radar_app/tasks/tasks_cubit.dart';
 import 'package:music_release_radar_app/tasks/task.dart';
 
@@ -19,6 +20,13 @@ class TasksPage extends StatelessWidget {
       child: Scaffold(
         appBar: _buildAppBar(context),
         body: _buildBody(context),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            context.read<TaskFormCubit>().loadArtistsSelection();
+            context.go('/tasks/form/artists-selection');
+          },
+          child: Icon(Icons.add),
+        ),
       ),
     );
   }
