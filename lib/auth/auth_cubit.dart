@@ -10,6 +10,7 @@ part 'auth_state.dart';
 class AuthCubit extends Cubit<AuthState> {
   final SpotifyClient _spotifyClient;
   final TokenService _tokenService;
+  SpotifyUser? _user;
 
   AuthCubit({
     required SpotifyClient spotifyClient,
@@ -17,6 +18,8 @@ class AuthCubit extends Cubit<AuthState> {
   })  : _spotifyClient = spotifyClient,
         _tokenService = tokenService,
         super(AuthInitial());
+
+  SpotifyUser? get user => _user;
 
   Future<void> checkAuthStatus() async {
     emit(AuthLoading());
@@ -32,8 +35,8 @@ class AuthCubit extends Cubit<AuthState> {
       }
 
       try {
-        final user = await _spotifyClient.getUserData(accessToken);
-        emit(Authenticated(user));
+        _user = await _spotifyClient.getUserData(accessToken);
+        emit(Authenticated(_user!));
         return;
       } on UnauthorizedException {
         final tokenResponse =
@@ -41,9 +44,8 @@ class AuthCubit extends Cubit<AuthState> {
         await _tokenService.saveTokens(
             tokenResponse.accessToken!, tokenResponse.refreshToken);
 
-        final user =
-            await _spotifyClient.getUserData(tokenResponse.accessToken!);
-        emit(Authenticated(user));
+        _user = await _spotifyClient.getUserData(tokenResponse.accessToken!);
+        emit(Authenticated(_user!));
         return;
       }
     } catch (e) {
@@ -60,8 +62,8 @@ class AuthCubit extends Cubit<AuthState> {
       await _tokenService.saveTokens(
           response.accessToken!, response.refreshToken!);
 
-      final user = await _spotifyClient.getUserData(response.accessToken!);
-      emit(Authenticated(user));
+      _user = await _spotifyClient.getUserData(response.accessToken!);
+      emit(Authenticated(_user!));
     } catch (e) {
       emit(AuthenticationFailed(e.toString()));
     }

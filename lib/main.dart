@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
 import 'package:music_release_radar_app/core/token_service.dart';
 import 'package:music_release_radar_app/auth/auth_page.dart';
-import 'package:music_release_radar_app/spotify/model/spotify_user.dart';
 import 'package:music_release_radar_app/spotify/spotify_client.dart';
 import 'package:music_release_radar_app/tasks/task_client.dart';
 import 'package:music_release_radar_app/tasks/tasks_cubit.dart';
@@ -49,7 +48,6 @@ class MyApp extends StatelessWidget {
         GoRoute(
           path: '/tasks',
           builder: (context, state) {
-            final user = state.extra as SpotifyUser;
             return BlocProvider(
               create: (context) => TasksCubit(
                 spotifyClient: spotifyClient,
@@ -57,7 +55,7 @@ class MyApp extends StatelessWidget {
                 taskClient: taskClient,
                 authCubit: context.read<AuthCubit>(),
               ),
-              child: TasksPage(user: user),
+              child: TasksPage(),
             );
           },
         ),

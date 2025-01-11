@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
-import 'package:music_release_radar_app/spotify/model/spotify_user.dart';
 import 'package:music_release_radar_app/tasks/tasks_cubit.dart';
 import 'package:music_release_radar_app/tasks/task.dart';
 
 class TasksPage extends StatelessWidget {
-  final SpotifyUser user;
-
-  const TasksPage({super.key, required this.user});
+  const TasksPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +24,8 @@ class TasksPage extends StatelessWidget {
   }
 
   AppBar _buildAppBar(BuildContext context) {
+    final user = context.read<AuthCubit>().user!;
+
     return AppBar(
       title: Text('Tasks'),
       actions: [
