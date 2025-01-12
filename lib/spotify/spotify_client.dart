@@ -65,21 +65,15 @@ class SpotifyClient {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
 
-      if (response.statusCode == 200) {
-        final userData = jsonDecode(response.body) as Map<String, dynamic>;
-        return SpotifyUser.fromJson(userData);
-      } else if (response.statusCode == 401) {
-        throw UnauthorizedException();
-      } else {
-        throw SpotifyClientException(
-            'Failed to fetch Spotify user data (${response.statusCode}): ${response.body}');
-      }
-    } on FormatException catch (e) {
-      throw SpotifyClientException('Invalid response format: $e');
-    } on UnauthorizedException {
-      rethrow;
+      final userData = _handleResponse(response);
+
+      return SpotifyUser.fromJson(userData);
     } catch (e) {
-      throw SpotifyClientException('Unknown error occurred: $e');
+      if (e is UnauthorizedException || e is SpotifyClientException) {
+        rethrow;
+      } else {
+        throw SpotifyClientException('Failed to fetch user data: $e');
+      }
     }
   }
 
@@ -91,24 +85,29 @@ class SpotifyClient {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
 
-      if (response.statusCode == 200) {
-        final artistsJson =
-            jsonDecode(response.body)['artists'] as Map<String, dynamic>;
-        final items = artistsJson['items'] as List<dynamic>;
+      final artistsJson =
+          _handleResponse(response)['artists'] as Map<String, dynamic>;
+      final items = artistsJson['items'] as List<dynamic>;
 
-        return items.map((artist) => SpotifyArtist.fromJson(artist)).toList();
-      } else if (response.statusCode == 401) {
-        throw UnauthorizedException();
-      } else {
-        throw SpotifyClientException(
-            'Failed to search for artists (${response.statusCode}): ${response.body}');
-      }
-    } on FormatException catch (e) {
-      throw SpotifyClientException('Invalid response format: $e');
-    } on UnauthorizedException {
-      rethrow;
+      return items.map((artist) => SpotifyArtist.fromJson(artist)).toList();
     } catch (e) {
-      throw SpotifyClientException('Unknown error occurred: $e');
+      if (e is UnauthorizedException || e is SpotifyClientException) {
+        rethrow;
+      } else {
+        throw SpotifyClientException('Failed to search for artists: $e');
+      }
+    }
+  }
+
+  Map<String, dynamic> _handleResponse(http.Response response,
+      {int expectedStatusCode = 200}) {
+    if (response.statusCode == expectedStatusCode) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else {
+      throw SpotifyClientException(
+          'Failed to fetch data (${response.statusCode}): ${response.body}');
     }
   }
 }
