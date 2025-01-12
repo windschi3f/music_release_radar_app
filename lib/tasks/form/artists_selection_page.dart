@@ -31,7 +31,11 @@ class ArtistsSelectionPage extends StatelessWidget {
             if (state is ArtistSelectionState &&
                 state.selectedArtists.isNotEmpty) {
               return IconButton(
-                  icon: Icon(Icons.chevron_right), onPressed: () {});
+                  icon: Icon(Icons.arrow_forward),
+                  onPressed: () {
+                    context.read<TaskFormCubit>().loadPlaylistSelection();
+                    context.push('/tasks/form/playlist-selection');
+                  });
             }
             return SizedBox.shrink();
           },

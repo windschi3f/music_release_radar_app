@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:music_release_radar_app/core/unauthorized_exception.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_artist.dart';
+import 'package:music_release_radar_app/spotify/model/spotify_playlist.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_user.dart';
 import 'package:music_release_radar_app/spotify/spotify_client_exception.dart';
 
@@ -95,6 +96,28 @@ class SpotifyClient {
         rethrow;
       } else {
         throw SpotifyClientException('Failed to search for artists: $e');
+      }
+    }
+  }
+
+  Future<List<SpotifyPlaylist>> getUserPlaylists(String accessToken) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_endpoint/me/playlists'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      final playlistsJson = _handleResponse(response);
+      final items = playlistsJson['items'] as List<dynamic>;
+
+      return items
+          .map((playlist) => SpotifyPlaylist.fromJson(playlist))
+          .toList();
+    } catch (e) {
+      if (e is UnauthorizedException || e is SpotifyClientException) {
+        rethrow;
+      } else {
+        throw SpotifyClientException('Failed to fetch user playlists: $e');
       }
     }
   }

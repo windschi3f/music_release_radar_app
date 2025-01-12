@@ -62,4 +62,38 @@ class TaskFormCubit extends Cubit<TaskFormState> {
 
     emit(currentState.copyWith(selectedArtists: updatedSelection));
   }
+
+  Future<void> loadPlaylistSelection() async {
+    final currentState = state as ArtistSelectionState;
+
+    try {
+      final userPlaylists = await _retryPolicy.execute(
+        (token) => _spotifyClient.getUserPlaylists(token),
+      );
+      emit(PlaylistSelectionState(
+        selectedArtists: currentState.selectedArtists,
+        userPlaylists: userPlaylists,
+        filteredPlaylists: userPlaylists,
+        selectedPlaylist: null,
+      ));
+    } on UnauthorizedException {
+      _authCubit.logout();
+    } on Exception catch (e) {
+      emit(TaskFormError(e.toString()));
+    }
+  }
+
+  void selectPlaylist(SpotifyPlaylist playlist) {
+    final currentState = state as PlaylistSelectionState;
+    emit(currentState.copyWith(selectedPlaylist: playlist));
+  }
+
+  void filterPlaylists(String query) {
+    final currentState = state as PlaylistSelectionState;
+    final filteredPlaylists = currentState.userPlaylists
+        .where((playlist) => playlist.name.toLowerCase().contains(query))
+        .toList();
+
+    emit(currentState.copyWith(filteredPlaylists: filteredPlaylists));
+  }
 }

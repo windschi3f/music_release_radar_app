@@ -35,22 +35,26 @@ class ArtistSelectionState extends TaskFormState {
 class PlaylistSelectionState extends TaskFormState {
   final List<SpotifyArtist> selectedArtists;
   final List<SpotifyPlaylist> userPlaylists;
-  final List<SpotifyPlaylist> selectedPlaylists;
+  final List<SpotifyPlaylist> filteredPlaylists;
+  final SpotifyPlaylist? selectedPlaylist;
 
   PlaylistSelectionState(
       {required this.selectedArtists,
       required this.userPlaylists,
-      required this.selectedPlaylists});
+      required this.filteredPlaylists,
+      required this.selectedPlaylist});
 
   PlaylistSelectionState copyWith({
     List<SpotifyArtist>? selectedArtists,
     List<SpotifyPlaylist>? userPlaylists,
-    List<SpotifyPlaylist>? selectedPlaylists,
+    List<SpotifyPlaylist>? filteredPlaylists,
+    SpotifyPlaylist? selectedPlaylist,
   }) {
     return PlaylistSelectionState(
       selectedArtists: selectedArtists ?? this.selectedArtists,
       userPlaylists: userPlaylists ?? this.userPlaylists,
-      selectedPlaylists: selectedPlaylists ?? this.selectedPlaylists,
+      filteredPlaylists: filteredPlaylists ?? this.filteredPlaylists,
+      selectedPlaylist: selectedPlaylist ?? this.selectedPlaylist,
     );
   }
 }
