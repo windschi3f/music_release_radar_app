@@ -54,6 +54,12 @@ class TaskFormCubit extends Cubit<TaskFormState> {
   }
 
   void searchArtists(String query) async {
+    if (query.isEmpty) {
+      emit(ArtistSelectionState(state.formData, []));
+      return;
+    }
+
+    emit(TaskFormLoading(state.formData));
     try {
       final artists = await _retryPolicy.execute(
         (token) => _spotifyClient.searchArtists(token, query),
@@ -80,6 +86,13 @@ class TaskFormCubit extends Cubit<TaskFormState> {
   }
 
   Future<void> loadPlaylistSelection() async {
+    if (state.formData.userPlaylists.isNotEmpty) {
+      emit(
+          PlaylistSelectionState(state.formData, state.formData.userPlaylists));
+      return;
+    }
+
+    emit(TaskFormLoading(state.formData));
     try {
       final userPlaylists = await _retryPolicy.execute(
         (token) => _spotifyClient.getUserPlaylists(token),

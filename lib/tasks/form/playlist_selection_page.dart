@@ -11,20 +11,30 @@ class PlaylistSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      onPopInvokedWithResult: (didPop, result) =>
-          context.read<TaskFormCubit>().navigateBack(),
-      child: BlocListener<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state is AuthenticationRequired) {
-            context.go('/');
-          }
-        },
-        child: Scaffold(
-          appBar: _buildAppBar(context),
-          body: _buildBody(context),
-        ),
-      ),
-    );
+        onPopInvokedWithResult: (didPop, result) =>
+            context.read<TaskFormCubit>().navigateBack(),
+        child: MultiBlocListener(
+          listeners: [
+            BlocListener<AuthCubit, AuthState>(listener: (context, state) {
+              if (state is AuthenticationRequired) {
+                context.go('/');
+              }
+            }),
+            BlocListener<TaskFormCubit, TaskFormState>(
+                listener: (context, state) {
+              if (state is TaskFormError) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("An error occurred. Please try again."),
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ));
+              }
+            }),
+          ],
+          child: Scaffold(
+            appBar: _buildAppBar(context),
+            body: _buildBody(context),
+          ),
+        ));
   }
 
   AppBar _buildAppBar(BuildContext context) {
@@ -66,15 +76,18 @@ class PlaylistSelectionPage extends StatelessWidget {
         Expanded(
           child: BlocBuilder<TaskFormCubit, TaskFormState>(
             builder: (context, state) {
-              if (state is PlaylistSelectionState) {
-                return _buildPlaylistSelectionList(
-                    context: context,
-                    filteredPlaylists: state.filteredPlaylists,
-                    selectedPlaylist: state.formData.selectedPlaylist);
-              } else if (state is TaskFormError) {
-                return Center(child: Text(state.message));
-              }
-              return Center(child: CircularProgressIndicator());
+              return Stack(
+                children: [
+                  _buildPlaylistSelectionList(
+                      context: context,
+                      filteredPlaylists: state is PlaylistSelectionState
+                          ? state.filteredPlaylists
+                          : state.formData.userPlaylists,
+                      selectedPlaylist: state.formData.selectedPlaylist),
+                  if (state is TaskFormLoading)
+                    const Center(child: CircularProgressIndicator()),
+                ],
+              );
             },
           ),
         )

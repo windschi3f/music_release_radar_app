@@ -51,13 +51,10 @@ class _TaskConfigPageState extends State<TaskConfigPage> {
             BlocListener<TaskFormCubit, TaskFormState>(
                 listener: (context, state) {
               if (state is TaskFormError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                        "An error occurred: ${state.message}. Please try again."),
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
-                );
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("An error occurred. Please try again."),
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ));
               } else if (state is TaskFormSaved) {
                 context.read<TasksCubit>().fetchTasks();
                 context.go('/tasks');
