@@ -9,6 +9,7 @@ import 'package:music_release_radar_app/auth/auth_page.dart';
 import 'package:music_release_radar_app/spotify/spotify_client.dart';
 import 'package:music_release_radar_app/tasks/form/artists_selection_page.dart';
 import 'package:music_release_radar_app/tasks/form/playlist_selection_page.dart';
+import 'package:music_release_radar_app/tasks/form/task_config_page.dart';
 import 'package:music_release_radar_app/tasks/form/task_form_cubit.dart';
 import 'package:music_release_radar_app/tasks/task_client.dart';
 import 'package:music_release_radar_app/tasks/tasks_cubit.dart';
@@ -64,6 +65,7 @@ class MyApp extends StatelessWidget {
                   create: (context) => TaskFormCubit(
                     spotifyClient: spotifyClient,
                     tokenService: tokenService,
+                    taskClient: taskClient,
                     authCubit: context.read<AuthCubit>(),
                   ),
                 ),
@@ -77,11 +79,16 @@ class MyApp extends StatelessWidget {
               builder: (context, state) => TasksPage(),
               routes: [
                 GoRoute(
-                    path: 'form/artists-selection',
-                    builder: (context, state) => const ArtistsSelectionPage()),
+                  path: 'form/artists-selection',
+                  builder: (context, state) => const ArtistsSelectionPage(),
+                ),
                 GoRoute(
                   path: 'form/playlist-selection',
                   builder: (context, state) => const PlaylistSelectionPage(),
+                ),
+                GoRoute(
+                  path: 'form/task-config',
+                  builder: (context, state) => const TaskConfigPage(),
                 ),
               ],
             ),

@@ -36,7 +36,8 @@ class PlaylistSelectionPage extends StatelessWidget {
             if (state is PlaylistSelectionState &&
                 state.selectedPlaylist != null) {
               return IconButton(
-                  icon: Icon(Icons.arrow_forward), onPressed: () {});
+                  icon: Icon(Icons.arrow_forward),
+                  onPressed: () => context.go('/tasks/form/task-config'));
             }
             return SizedBox.shrink();
           },

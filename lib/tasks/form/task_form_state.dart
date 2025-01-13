@@ -58,3 +58,5 @@ class PlaylistSelectionState extends TaskFormState {
     );
   }
 }
+
+class TaskFormSaved extends TaskFormState {}
