@@ -10,7 +10,10 @@ class ArtistsSelectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthCubit, AuthState>(
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) =>
+          context.read<TaskFormCubit>().navigateBack(),
+      child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthenticationRequired) {
             context.go('/');
@@ -19,7 +22,9 @@ class ArtistsSelectionPage extends StatelessWidget {
         child: Scaffold(
           appBar: _buildAppBar(context),
           body: _buildBody(context),
-        ));
+        ),
+      ),
+    );
   }
 
   AppBar _buildAppBar(BuildContext context) {
@@ -29,11 +34,11 @@ class ArtistsSelectionPage extends StatelessWidget {
         BlocBuilder<TaskFormCubit, TaskFormState>(
           builder: (context, state) {
             if (state is ArtistSelectionState &&
-                state.selectedArtists.isNotEmpty) {
+                state.formData.selectedArtists.isNotEmpty) {
               return IconButton(
                   icon: Icon(Icons.arrow_forward),
                   onPressed: () {
-                    context.read<TaskFormCubit>().loadPlaylistSelection();
+                    context.read<TaskFormCubit>().navigateForward();
                     context.push('/tasks/form/playlist-selection');
                   });
             }
@@ -66,7 +71,7 @@ class ArtistsSelectionPage extends StatelessWidget {
                 return _buildArtistSelectionList(
                     context: context,
                     searchResults: state.searchResults,
-                    selectedArtists: state.selectedArtists);
+                    selectedArtists: state.formData.selectedArtists);
               } else if (state is TaskFormError) {
                 return Center(child: Text(state.message));
               }

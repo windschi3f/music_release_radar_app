@@ -22,7 +22,7 @@ class TasksPage extends StatelessWidget {
         body: _buildBody(context),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            context.read<TaskFormCubit>().loadArtistsSelection();
+            context.read<TaskFormCubit>().navigateForward();
             context.go('/tasks/form/artists-selection');
           },
           child: Icon(Icons.add),

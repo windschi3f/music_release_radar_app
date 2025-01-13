@@ -36,35 +36,39 @@ class _TaskConfigPageState extends State<TaskConfigPage> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<AuthCubit, AuthState>(
-          listener: (context, state) {
-            if (state is AuthenticationRequired) {
-              context.go('/');
-            }
-          },
-        ),
-        BlocListener<TaskFormCubit, TaskFormState>(listener: (context, state) {
-          if (state is TaskFormError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                    "An error occurred: ${state.message}. Please try again."),
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            );
-          } else if (state is TaskFormSaved) {
-            context.read<TasksCubit>().fetchTasks();
-            context.go('/tasks');
-          }
-        }),
-      ],
-      child: Scaffold(
-        appBar: _buildAppBar(context),
-        body: _buildBody(context),
-      ),
-    );
+    return PopScope(
+        onPopInvokedWithResult: (didPop, result) =>
+            context.read<TaskFormCubit>().navigateBack(),
+        child: MultiBlocListener(
+          listeners: [
+            BlocListener<AuthCubit, AuthState>(
+              listener: (context, state) {
+                if (state is AuthenticationRequired) {
+                  context.go('/');
+                }
+              },
+            ),
+            BlocListener<TaskFormCubit, TaskFormState>(
+                listener: (context, state) {
+              if (state is TaskFormError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                        "An error occurred: ${state.message}. Please try again."),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                );
+              } else if (state is TaskFormSaved) {
+                context.read<TasksCubit>().fetchTasks();
+                context.go('/tasks');
+              }
+            }),
+          ],
+          child: Scaffold(
+            appBar: _buildAppBar(context),
+            body: _buildBody(context),
+          ),
+        ));
   }
 
   AppBar _buildAppBar(BuildContext context) {

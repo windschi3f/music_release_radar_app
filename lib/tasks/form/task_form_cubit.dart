@@ -32,93 +32,94 @@ class TaskFormCubit extends Cubit<TaskFormState> {
         _tokenService = tokenService,
         super(TaskFormInitial());
 
-  void loadArtistsSelection() {
-    if (state is PlaylistSelectionState) {
-      emit(ArtistSelectionState(
-        searchResults: [],
-        selectedArtists: (state as PlaylistSelectionState).selectedArtists,
-      ));
-    } else {
-      emit(ArtistSelectionState(searchResults: [], selectedArtists: []));
+  void navigateForward() {
+    if (state is TaskFormInitial || state is TaskFormSaved) {
+      emit(ArtistSelectionState(TaskFormData(), []));
+    } else if (state is ArtistSelectionState) {
+      loadPlaylistSelection();
+    } else if (state is PlaylistSelectionState) {
+      emit(TaskConfigState(state.formData));
+    }
+  }
+
+  void navigateBack() {
+    if (state is ArtistSelectionState) {
+      emit(TaskFormInitial());
+    } else if (state is PlaylistSelectionState) {
+      emit(ArtistSelectionState(state.formData, []));
+    } else if (state is TaskConfigState) {
+      emit(
+          PlaylistSelectionState(state.formData, state.formData.userPlaylists));
     }
   }
 
   void searchArtists(String query) async {
-    final currentState = state as ArtistSelectionState;
-
     try {
       final artists = await _retryPolicy.execute(
         (token) => _spotifyClient.searchArtists(token, query),
       );
-      emit(ArtistSelectionState(
-        searchResults: artists,
-        selectedArtists: currentState.selectedArtists,
-      ));
+      emit(ArtistSelectionState(state.formData, artists));
     } on UnauthorizedException {
       _authCubit.logout();
     } on Exception catch (e) {
-      emit(TaskFormError(e.toString()));
+      emit(TaskFormError(state.formData, e.toString()));
     }
   }
 
   void toggleArtistSelection(SpotifyArtist artist) {
-    final currentState = state as ArtistSelectionState;
-    final isSelected = currentState.selectedArtists.contains(artist);
-    final updatedSelection = isSelected
-        ? currentState.selectedArtists.where((a) => a.id != artist.id).toList()
-        : [...currentState.selectedArtists, artist];
+    final selectedArtists = state.formData.selectedArtists;
 
-    emit(currentState.copyWith(selectedArtists: updatedSelection));
+    final isSelected = selectedArtists.contains(artist);
+    final updatedSelection = isSelected
+        ? selectedArtists.where((a) => a.id != artist.id).toList()
+        : [...selectedArtists, artist];
+
+    emit(ArtistSelectionState(
+        state.formData.copyWith(selectedArtists: updatedSelection),
+        (state as ArtistSelectionState).searchResults));
   }
 
   Future<void> loadPlaylistSelection() async {
-    final currentState = state as ArtistSelectionState;
-
     try {
       final userPlaylists = await _retryPolicy.execute(
         (token) => _spotifyClient.getUserPlaylists(token),
       );
+
       emit(PlaylistSelectionState(
-        selectedArtists: currentState.selectedArtists,
-        userPlaylists: userPlaylists,
-        filteredPlaylists: userPlaylists,
-        selectedPlaylist: null,
-      ));
+          state.formData.copyWith(userPlaylists: userPlaylists),
+          userPlaylists));
     } on UnauthorizedException {
       _authCubit.logout();
     } on Exception catch (e) {
-      emit(TaskFormError(e.toString()));
+      emit(TaskFormError(state.formData, e.toString()));
     }
   }
 
   void selectPlaylist(SpotifyPlaylist playlist) {
-    final currentState = state as PlaylistSelectionState;
-    emit(currentState.copyWith(selectedPlaylist: playlist));
+    emit(PlaylistSelectionState(
+        state.formData.copyWith(selectedPlaylist: playlist),
+        (state as PlaylistSelectionState).filteredPlaylists));
   }
 
   void filterPlaylists(String query) {
-    final currentState = state as PlaylistSelectionState;
-    final filteredPlaylists = currentState.userPlaylists
+    final filteredPlaylists = state.formData.userPlaylists
         .where((playlist) => playlist.name.toLowerCase().contains(query))
         .toList();
 
-    emit(currentState.copyWith(filteredPlaylists: filteredPlaylists));
+    emit(PlaylistSelectionState(state.formData, filteredPlaylists));
   }
 
   void saveTask(
       {required String name,
       required DateTime checkFrom,
       required int executionIntervalDays}) async {
-    final currentState = state as PlaylistSelectionState;
-    final selectedPlaylist = currentState.selectedPlaylist;
-    final selectedArtists = currentState.selectedArtists;
-    emit(TaskFormLoading());
+    emit(TaskFormLoading(state.formData));
 
     final taskRequestDto = TaskRequestDto(
       name: name,
       checkFrom: checkFrom,
       executionIntervalDays: executionIntervalDays,
-      playlistId: selectedPlaylist!.id,
+      playlistId: state.formData.selectedPlaylist!.id,
       refreshToken: await _tokenService
           .retrieveTokens()
           .then((tokens) => tokens[TokenService.refreshTokenKey]!),
@@ -131,14 +132,14 @@ class TaskFormCubit extends Cubit<TaskFormState> {
       await _retryPolicy.execute((token) => _taskClient.addTaskItems(
           token,
           task.id,
-          selectedArtists
+          state.formData.selectedArtists
               .map((artist) => TaskItem(externalReferenceId: artist.id))
               .toList()));
-      emit(TaskFormSaved());
+      emit(TaskFormSaved(state.formData));
     } on UnauthorizedException {
       _authCubit.logout();
     } on Exception catch (e) {
-      emit(TaskFormError(e.toString()));
+      emit(TaskFormError(state.formData, e.toString()));
     }
   }
 }

@@ -12,7 +12,7 @@ class PlaylistSelectionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopScope(
       onPopInvokedWithResult: (didPop, result) =>
-          context.read<TaskFormCubit>().loadArtistsSelection(),
+          context.read<TaskFormCubit>().navigateBack(),
       child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthenticationRequired) {
@@ -34,10 +34,13 @@ class PlaylistSelectionPage extends StatelessWidget {
         BlocBuilder<TaskFormCubit, TaskFormState>(
           builder: (context, state) {
             if (state is PlaylistSelectionState &&
-                state.selectedPlaylist != null) {
+                state.formData.selectedPlaylist != null) {
               return IconButton(
                   icon: Icon(Icons.arrow_forward),
-                  onPressed: () => context.go('/tasks/form/task-config'));
+                  onPressed: () {
+                    context.read<TaskFormCubit>().navigateForward();
+                    context.push('/tasks/form/task-config');
+                  });
             }
             return SizedBox.shrink();
           },
@@ -67,7 +70,7 @@ class PlaylistSelectionPage extends StatelessWidget {
                 return _buildPlaylistSelectionList(
                     context: context,
                     filteredPlaylists: state.filteredPlaylists,
-                    selectedPlaylist: state.selectedPlaylist);
+                    selectedPlaylist: state.formData.selectedPlaylist);
               } else if (state is TaskFormError) {
                 return Center(child: Text(state.message));
               }
