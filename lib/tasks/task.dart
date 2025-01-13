@@ -1,9 +1,9 @@
 class Task {
-  final String id;
+  final int id;
   final String name;
   final String platform;
   final int executionIntervalDays;
-  final DateTime lastTimeExecuted;
+  final DateTime? lastTimeExecuted;
   final DateTime checkFrom;
   final bool active;
   final String playlistId;
@@ -25,23 +25,22 @@ class Task {
       name: json['name'],
       platform: json['platform'],
       executionIntervalDays: json['executionIntervalDays'],
-      lastTimeExecuted: DateTime.parse(json['lastTimeExecuted']),
+      lastTimeExecuted: json['lastTimeExecuted'] != null
+          ? DateTime.parse(json['lastTimeExecuted'])
+          : null,
       checkFrom: DateTime.parse(json['checkFrom']),
       active: json['active'],
       playlistId: json['playlistId'],
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'platform': platform,
-      'executionIntervalDays': executionIntervalDays,
-      'lastTimeExecuted': lastTimeExecuted.toIso8601String(),
-      'checkFrom': checkFrom.toIso8601String(),
-      'active': active,
-      'playlistId': playlistId,
-    };
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Task && other.id == id;
   }
+
+  @override
+  int get hashCode => id.hashCode;
 }
