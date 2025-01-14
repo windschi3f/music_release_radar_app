@@ -1,3 +1,6 @@
+import 'package:music_release_radar_app/tasks/added_item.dart';
+import 'package:music_release_radar_app/tasks/task_item.dart';
+
 class Task {
   final int id;
   final String name;
@@ -7,6 +10,8 @@ class Task {
   final DateTime checkFrom;
   final bool active;
   final String playlistId;
+  List<TaskItem> taskItems;
+  List<AddedItem> addedItems;
 
   Task({
     required this.id,
@@ -17,6 +22,8 @@ class Task {
     required this.checkFrom,
     required this.active,
     required this.playlistId,
+    this.taskItems = const [],
+    this.addedItems = const [],
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {

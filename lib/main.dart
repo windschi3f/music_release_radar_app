@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
                     tokenService: tokenService,
                     taskClient: taskClient,
                     authCubit: context.read<AuthCubit>(),
-                  ),
+                  )..fetchTasks(),
                 ),
                 BlocProvider(
                   create: (context) => TaskFormCubit(

@@ -8,7 +8,7 @@ import 'package:music_release_radar_app/spotify/model/spotify_artist.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_playlist.dart';
 import 'package:music_release_radar_app/spotify/spotify_client.dart';
 import 'package:music_release_radar_app/tasks/task_client.dart';
-import 'package:music_release_radar_app/tasks/task_item.dart';
+import 'package:music_release_radar_app/tasks/task_item_request_dto.dart';
 import 'package:music_release_radar_app/tasks/task_request_dto.dart';
 
 part 'task_form_state.dart';
@@ -146,7 +146,8 @@ class TaskFormCubit extends Cubit<TaskFormState> {
           token,
           task.id,
           state.formData.selectedArtists
-              .map((artist) => TaskItem(externalReferenceId: artist.id))
+              .map((artist) =>
+                  TaskItemRequestDto(externalReferenceId: artist.id))
               .toList()));
       emit(TaskFormSaved(state.formData));
     } on UnauthorizedException {

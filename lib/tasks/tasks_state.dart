@@ -9,8 +9,9 @@ final class TasksLoading extends TasksState {}
 
 final class TasksSuccess extends TasksState {
   final List<Task> tasks;
+  final List<SpotifyPlaylist> userPlaylists;
 
-  TasksSuccess(this.tasks);
+  TasksSuccess(this.tasks, this.userPlaylists);
 }
 
 final class TasksError extends TasksState {
