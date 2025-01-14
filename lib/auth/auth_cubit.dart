@@ -57,6 +57,14 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> authenticate() async {
     emit(AuthLoading());
 
+    final tokens = await _tokenService.retrieveTokens();
+    final accessToken = tokens[TokenService.accessTokenKey];
+    final refreshToken = tokens[TokenService.refreshTokenKey];
+    if (accessToken != null && refreshToken != null) {
+      checkAuthStatus();
+      return;
+    }
+
     try {
       final response = await _spotifyClient.authenticate();
       await _tokenService.saveTokens(
