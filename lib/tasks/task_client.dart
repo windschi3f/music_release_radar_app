@@ -60,6 +60,21 @@ class TaskClient {
     }
   }
 
+  Future<void> deleteTask(String accessToken, int taskId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$_endpoint/tasks/$taskId'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode != 204) {
+        throw TaskClientException('(${response.statusCode}): ${response.body}');
+      }
+    } catch (e) {
+      throw TaskClientException('Failed to delete task: $e');
+    }
+  }
+
   Future<void> addTaskItems(String accessToken, int taskId,
       List<TaskItemRequestDto> taskItemDtos) async {
     try {

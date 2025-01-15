@@ -1,21 +1,30 @@
 part of 'tasks_cubit.dart';
 
 @immutable
-sealed class TasksState {}
-
-final class TasksInitial extends TasksState {}
-
-final class TasksLoading extends TasksState {}
-
-final class TasksSuccess extends TasksState {
+sealed class TasksState {
   final List<Task> tasks;
   final List<SpotifyPlaylist> userPlaylists;
 
-  TasksSuccess(this.tasks, this.userPlaylists);
+  const TasksState({this.tasks = const [], this.userPlaylists = const []});
 }
 
-final class TasksError extends TasksState {
-  final String message;
+final class TasksInitial extends TasksState {}
 
-  TasksError(this.message);
+final class TasksLoading extends TasksState {
+  const TasksLoading(List<Task> tasks, List<SpotifyPlaylist> userPlaylists)
+      : super(tasks: tasks, userPlaylists: userPlaylists);
+}
+
+final class TasksLoadingSuccess extends TasksState {
+  const TasksLoadingSuccess(
+      List<Task> tasks, List<SpotifyPlaylist> userPlaylists)
+      : super(tasks: tasks, userPlaylists: userPlaylists);
+}
+
+final class TasksLoadingError extends TasksState {}
+
+final class TasksDeletionError extends TasksState {
+  const TasksDeletionError(
+      List<Task> tasks, List<SpotifyPlaylist> userPlaylists)
+      : super(tasks: tasks, userPlaylists: userPlaylists);
 }

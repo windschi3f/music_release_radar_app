@@ -29,7 +29,7 @@ class TasksCubit extends Cubit<TasksState> {
         super(TasksInitial());
 
   Future<void> fetchTasks() async {
-    emit(TasksLoading());
+    emit(TasksLoading(state.tasks, state.userPlaylists));
     try {
       final tasks = await _retryPolicy.execute(
         (token) => _taskClient.getTasks(token),
@@ -49,11 +49,26 @@ class TasksCubit extends Cubit<TasksState> {
         (token) => _spotifyClient.getUserPlaylists(token),
       );
 
-      emit(TasksSuccess(tasks, userPlaylists));
+      emit(TasksLoadingSuccess(tasks, userPlaylists));
     } on UnauthorizedException {
       _authCubit.logout();
     } catch (e) {
-      emit(TasksError(e.toString()));
+      emit(TasksLoadingError());
+    }
+  }
+
+  Future<void> deleteTask(Task task) async {
+    emit(TasksLoading(state.tasks, state.userPlaylists));
+
+    try {
+      await _retryPolicy.execute(
+        (token) => _taskClient.deleteTask(token, task.id),
+      );
+      fetchTasks();
+    } on UnauthorizedException {
+      _authCubit.logout();
+    } catch (e) {
+      emit(TasksDeletionError(state.tasks, state.userPlaylists));
     }
   }
 }

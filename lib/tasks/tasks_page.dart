@@ -13,12 +13,27 @@ class TasksPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthCubit, AuthState>(
-      listener: (context, state) {
-        if (state is AuthenticationRequired) {
-          context.go('/');
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state is AuthenticationRequired) {
+              context.go('/');
+            }
+          },
+        ),
+        BlocListener<TasksCubit, TasksState>(
+          listener: (context, state) {
+            if (state is TasksDeletionError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('An error occurred while deleting the task.'),
+                ),
+              );
+            }
+          },
+        ),
+      ],
       child: Scaffold(
         appBar: _buildAppBar(context),
         body: _buildBody(context),
@@ -65,7 +80,8 @@ class TasksPage extends StatelessWidget {
       builder: (context, state) {
         if (state is TasksLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (state is TasksSuccess) {
+        } else if (state is TasksLoadingSuccess ||
+            state is TasksDeletionError) {
           return _buildTasksView(context, state.tasks, state.userPlaylists);
         } else {
           return const Center(
@@ -314,6 +330,8 @@ class TasksPage extends StatelessWidget {
   }
 
   Future<void> _showDeleteConfirmationDialog(BuildContext context, Task task) {
+    final tasksCubit = context.read<TasksCubit>();
+
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -328,6 +346,7 @@ class TasksPage extends StatelessWidget {
             TextButton(
               child: const Text('Delete', style: TextStyle(color: Colors.red)),
               onPressed: () {
+                tasksCubit.deleteTask(task);
                 Navigator.of(context).pop();
               },
             ),
