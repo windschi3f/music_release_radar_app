@@ -46,6 +46,15 @@ class TaskClient extends BaseHttpClient {
         expectedStatus: 204,
       );
 
+  Future<void> executeTask(String accessToken, int taskId) => handleRequest(
+        () => http.get(
+          Uri.parse('$_endpoint/tasks/$taskId/execute'),
+          headers: getHeaders(accessToken),
+        ),
+        (_) => {},
+        expectedStatus: 202,
+      );
+
   Future<void> addTaskItems(
     String accessToken,
     int taskId,

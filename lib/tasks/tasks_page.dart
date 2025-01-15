@@ -24,20 +24,23 @@ class TasksPage extends StatelessWidget {
           },
         ),
         BlocListener<TasksCubit, TasksState>(
+          listenWhen: (previous, current) =>
+              current is TasksLoadingError ||
+              current is TasksDeletionError ||
+              current is TasksExecutionError,
           listener: (context, state) {
-            if (state is TasksLoadingError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('An error occurred while loading tasks.'),
-                ),
-              );
-            } else if (state is TasksDeletionError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('An error occurred while deleting the task.'),
-                ),
-              );
-            }
+            final messages = {
+              TasksLoadingError: 'loading',
+              TasksDeletionError: 'deleting',
+              TasksExecutionError: 'executing'
+            };
+            final action = messages[state.runtimeType] ?? 'processing';
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('An error occurred while $action the task.'),
+              ),
+            );
           },
         ),
       ],
@@ -180,10 +183,22 @@ class TasksPage extends StatelessWidget {
     return PopupMenuButton<String>(
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
         PopupMenuItem<String>(
-          onTap: () => _showDeleteConfirmationDialog(context, task),
+          onTap: () => context.read<TasksCubit>().executeTask(task),
+          enabled: !task.processing,
           child: ListTile(
-            leading: Icon(Icons.delete, color: Colors.red),
-            title: Text('Delete Task', style: TextStyle(color: Colors.red)),
+            leading: Icon(Icons.play_arrow),
+            title: Text('Execute Now'),
+          ),
+        ),
+        PopupMenuItem<String>(
+          onTap: () => _showDeleteConfirmationDialog(context, task),
+          enabled: !task.processing,
+          child: ListTile(
+            leading: Icon(Icons.delete,
+                color: task.processing ? Colors.grey : Colors.red),
+            title: Text('Delete Task',
+                style: TextStyle(
+                    color: task.processing ? Colors.grey : Colors.red)),
           ),
         ),
       ],
@@ -290,8 +305,11 @@ class TasksPage extends StatelessWidget {
             _buildInfoRow(
               context,
               'Last Executed',
-              _formatDate(context, task.lastTimeExecuted),
+              task.processing
+                  ? 'Processing'
+                  : _formatDateTime(context, task.lastTimeExecuted),
               Icons.update,
+              primaryColor: task.processing,
             ),
             _buildInfoRow(
               context,
@@ -315,8 +333,9 @@ class TasksPage extends StatelessWidget {
     BuildContext context,
     String label,
     String value,
-    IconData icon,
-  ) {
+    IconData icon, {
+    bool primaryColor = false,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return ListTile(
@@ -326,7 +345,8 @@ class TasksPage extends StatelessWidget {
       leading: Icon(
         icon,
         size: 18,
-        color: colorScheme.onSurfaceVariant,
+        color:
+            primaryColor ? colorScheme.primary : colorScheme.onSurfaceVariant,
       ),
       title: Text(
         label,
@@ -337,7 +357,7 @@ class TasksPage extends StatelessWidget {
       trailing: Text(
         value,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface,
+              color: primaryColor ? colorScheme.primary : colorScheme.onSurface,
               fontWeight: FontWeight.w500,
             ),
       ),
@@ -378,5 +398,15 @@ class TasksPage extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final dateFormatter = DateFormat.yMMMd(locale);
     return dateFormatter.format(date);
+  }
+
+  String _formatDateTime(BuildContext context, DateTime? date) {
+    if (date == null) {
+      return 'never';
+    }
+    final locale = Localizations.localeOf(context).toString();
+    final dateFormatter = DateFormat.yMMMd(locale);
+    final timeFormatter = DateFormat.Hm(locale);
+    return '${dateFormatter.format(date)} ${timeFormatter.format(date)}';
   }
 }

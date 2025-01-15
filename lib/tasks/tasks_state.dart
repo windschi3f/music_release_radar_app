@@ -28,3 +28,9 @@ final class TasksDeletionError extends TasksState {
       List<Task> tasks, List<SpotifyPlaylist> userPlaylists)
       : super(tasks: tasks, userPlaylists: userPlaylists);
 }
+
+final class TasksExecutionError extends TasksState {
+  const TasksExecutionError(
+      List<Task> tasks, List<SpotifyPlaylist> userPlaylists)
+      : super(tasks: tasks, userPlaylists: userPlaylists);
+}

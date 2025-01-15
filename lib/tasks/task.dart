@@ -10,6 +10,7 @@ class Task {
   final DateTime checkFrom;
   final bool active;
   final String playlistId;
+  final bool processing;
   List<TaskItem> taskItems;
   List<AddedItem> addedItems;
 
@@ -22,6 +23,7 @@ class Task {
     required this.checkFrom,
     required this.active,
     required this.playlistId,
+    required this.processing,
     this.taskItems = const [],
     this.addedItems = const [],
   });
@@ -38,6 +40,7 @@ class Task {
       checkFrom: DateTime.parse(json['checkFrom']),
       active: json['active'],
       playlistId: json['playlistId'],
+      processing: json['processing'],
     );
   }
 

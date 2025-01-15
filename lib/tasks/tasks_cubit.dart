@@ -71,4 +71,19 @@ class TasksCubit extends Cubit<TasksState> {
       emit(TasksDeletionError(state.tasks, state.userPlaylists));
     }
   }
+
+  Future<void> executeTask(Task task) async {
+    emit(TasksLoading(state.tasks, state.userPlaylists));
+
+    try {
+      await _retryPolicy.execute(
+        (token) => _taskClient.executeTask(token, task.id),
+      );
+      fetchTasks();
+    } on UnauthorizedException {
+      _authCubit.logout();
+    } catch (e) {
+      emit(TasksExecutionError(state.tasks, state.userPlaylists));
+    }
+  }
 }
