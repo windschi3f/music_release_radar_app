@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:music_release_radar_app/core/unauthorized_exception.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_artist.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_playlist.dart';
+import 'package:music_release_radar_app/spotify/model/spotify_track.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_user.dart';
 import 'package:music_release_radar_app/spotify/spotify_client_exception.dart';
 
@@ -118,6 +119,27 @@ class SpotifyClient {
         rethrow;
       } else {
         throw SpotifyClientException('Failed to fetch user playlists: $e');
+      }
+    }
+  }
+
+  Future<List<SpotifyTrack>> getSeveralTracks(
+      String accessToken, List<String> trackIds) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_endpoint/tracks?ids=${trackIds.join(',')}'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      final tracksJson = _handleResponse(response);
+      final items = tracksJson['tracks'] as List<dynamic>;
+
+      return items.map((track) => SpotifyTrack.fromJson(track)).toList();
+    } catch (e) {
+      if (e is UnauthorizedException || e is SpotifyClientException) {
+        rethrow;
+      } else {
+        throw SpotifyClientException('Failed to fetch tracks: $e');
       }
     }
   }

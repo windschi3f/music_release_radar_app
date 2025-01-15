@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_playlist.dart';
+import 'package:music_release_radar_app/tasks/added_items/added_items_cubit.dart';
 import 'package:music_release_radar_app/tasks/form/task_form_cubit.dart';
 import 'package:music_release_radar_app/tasks/tasks_cubit.dart';
 import 'package:music_release_radar_app/tasks/task.dart';
@@ -209,7 +210,12 @@ class TasksPage extends StatelessWidget {
       color: colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        onTap: () => context.go('/tasks/${task.id}/tracks'),
+        onTap: () {
+          if (task.addedItems.isNotEmpty) {
+            context.read<AddedItemsCubit>().init(task.addedItems);
+            context.go('/tasks/added-items');
+          }
+        },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -245,11 +251,12 @@ class TasksPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 4),
-              Icon(
-                Icons.chevron_right,
-                size: 20,
-                color: colorScheme.primary,
-              ),
+              if (task.addedItems.isNotEmpty)
+                Icon(
+                  Icons.chevron_right,
+                  size: 20,
+                  color: colorScheme.primary,
+                ),
             ],
           ),
         ),

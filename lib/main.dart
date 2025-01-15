@@ -7,6 +7,8 @@ import 'package:music_release_radar_app/auth/auth_cubit.dart';
 import 'package:music_release_radar_app/core/token_service.dart';
 import 'package:music_release_radar_app/auth/auth_page.dart';
 import 'package:music_release_radar_app/spotify/spotify_client.dart';
+import 'package:music_release_radar_app/tasks/added_items/added_items_cubit.dart';
+import 'package:music_release_radar_app/tasks/added_items/added_items_page.dart';
 import 'package:music_release_radar_app/tasks/form/artists_selection_page.dart';
 import 'package:music_release_radar_app/tasks/form/playlist_selection_page.dart';
 import 'package:music_release_radar_app/tasks/form/task_config_page.dart';
@@ -69,6 +71,13 @@ class MyApp extends StatelessWidget {
                     authCubit: context.read<AuthCubit>(),
                   ),
                 ),
+                BlocProvider(
+                  create: (context) => AddedItemsCubit(
+                    spotifyClient: spotifyClient,
+                    tokenService: tokenService,
+                    authCubit: context.read<AuthCubit>(),
+                  ),
+                ),
               ],
               child: child,
             );
@@ -89,6 +98,10 @@ class MyApp extends StatelessWidget {
                 GoRoute(
                   path: 'form/task-config',
                   builder: (context, state) => const TaskConfigPage(),
+                ),
+                GoRoute(
+                  path: 'added-items',
+                  builder: (context, state) => const AddedItemsPage(),
                 ),
               ],
             ),

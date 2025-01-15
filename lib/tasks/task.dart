@@ -1,4 +1,4 @@
-import 'package:music_release_radar_app/tasks/added_item.dart';
+import 'package:music_release_radar_app/tasks/added_items/added_item.dart';
 import 'package:music_release_radar_app/tasks/task_item.dart';
 
 class Task {

@@ -21,12 +21,21 @@ class SpotifyArtist {
     return SpotifyArtist(
       id: json['id'] as String,
       name: json['name'] as String,
-      images: (json['images'] as List<dynamic>)
-          .map((e) => Image.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      popularity: json['popularity'] as int,
-      followerCount: json['followers']['total'] as int,
-      genres: (json['genres'] as List<dynamic>).cast<String>(),
+      images: (json['images'] as List<dynamic>?)
+              ?.map((e) => Image.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      // popularity optional
+      popularity: json['popularity'] as int? ?? 0,
+      // followers optional
+      followerCount:
+          json['followers'] != null ? json['followers']['total'] as int : 0,
+      // genres optional
+      //genres: (json['genres'] as List<dynamic>).cast<String>(),
+      genres: (json['genres'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
     );
   }
 

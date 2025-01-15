@@ -1,7 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:music_release_radar_app/core/unauthorized_exception.dart';
-import 'package:music_release_radar_app/tasks/added_item.dart';
+import 'package:music_release_radar_app/tasks/added_items/added_item.dart';
 import 'package:music_release_radar_app/tasks/task_client_exception.dart';
 import 'package:music_release_radar_app/tasks/task_item.dart';
 import 'package:music_release_radar_app/tasks/task_item_request_dto.dart';
