@@ -1,15 +1,15 @@
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:music_release_radar_app/core/unauthorized_exception.dart';
+import 'package:music_release_radar_app/core/base_http_client.dart';
+
 import 'package:music_release_radar_app/spotify/model/spotify_artist.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_playlist.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_track.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_user.dart';
 import 'package:music_release_radar_app/spotify/spotify_client_exception.dart';
 
-class SpotifyClient {
+class SpotifyClient extends BaseHttpClient {
   static const String _authorizationEndpoint =
       'https://accounts.spotify.com/authorize';
   static const String _tokenEndpoint = 'https://accounts.spotify.com/api/token';
@@ -60,99 +60,45 @@ class SpotifyClient {
     );
   }
 
-  Future<SpotifyUser> getUserData(String accessToken) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$_endpoint/me'),
-        headers: {'Authorization': 'Bearer $accessToken'},
+  Future<SpotifyUser> getUserData(String accessToken) => handleRequest(
+        () => http.get(
+          Uri.parse('$_endpoint/me'),
+          headers: getHeaders(accessToken),
+        ),
+        (json) => SpotifyUser.fromJson(json),
       );
 
-      final userData = _handleResponse(response);
-
-      return SpotifyUser.fromJson(userData);
-    } catch (e) {
-      if (e is UnauthorizedException || e is SpotifyClientException) {
-        rethrow;
-      } else {
-        throw SpotifyClientException('Failed to fetch user data: $e');
-      }
-    }
-  }
-
-  Future<List<SpotifyArtist>> searchArtists(
-      String accessToken, String query) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$_endpoint/search?q=$query&type=artist'),
-        headers: {'Authorization': 'Bearer $accessToken'},
+  Future<List<SpotifyArtist>> searchArtists(String accessToken, String query) =>
+      handleRequest(
+        () => http.get(
+          Uri.parse('$_endpoint/search?q=$query&type=artist'),
+          headers: getHeaders(accessToken),
+        ),
+        (json) => (json['artists']['items'] as List)
+            .map((artist) => SpotifyArtist.fromJson(artist))
+            .toList(),
       );
 
-      final artistsJson =
-          _handleResponse(response)['artists'] as Map<String, dynamic>;
-      final items = artistsJson['items'] as List<dynamic>;
-
-      return items.map((artist) => SpotifyArtist.fromJson(artist)).toList();
-    } catch (e) {
-      if (e is UnauthorizedException || e is SpotifyClientException) {
-        rethrow;
-      } else {
-        throw SpotifyClientException('Failed to search for artists: $e');
-      }
-    }
-  }
-
-  Future<List<SpotifyPlaylist>> getUserPlaylists(String accessToken) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$_endpoint/me/playlists'),
-        headers: {'Authorization': 'Bearer $accessToken'},
+  Future<List<SpotifyPlaylist>> getUserPlaylists(String accessToken) =>
+      handleRequest(
+        () => http.get(
+          Uri.parse('$_endpoint/me/playlists'),
+          headers: getHeaders(accessToken),
+        ),
+        (json) => (json['items'] as List)
+            .map((playlist) => SpotifyPlaylist.fromJson(playlist))
+            .toList(),
       );
-
-      final playlistsJson = _handleResponse(response);
-      final items = playlistsJson['items'] as List<dynamic>;
-
-      return items
-          .map((playlist) => SpotifyPlaylist.fromJson(playlist))
-          .toList();
-    } catch (e) {
-      if (e is UnauthorizedException || e is SpotifyClientException) {
-        rethrow;
-      } else {
-        throw SpotifyClientException('Failed to fetch user playlists: $e');
-      }
-    }
-  }
 
   Future<List<SpotifyTrack>> getSeveralTracks(
-      String accessToken, List<String> trackIds) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$_endpoint/tracks?ids=${trackIds.join(',')}'),
-        headers: {'Authorization': 'Bearer $accessToken'},
+          String accessToken, List<String> trackIds) =>
+      handleRequest(
+        () => http.get(
+          Uri.parse('$_endpoint/tracks?ids=${trackIds.join(",")}'),
+          headers: getHeaders(accessToken),
+        ),
+        (json) => (json['tracks'] as List)
+            .map((track) => SpotifyTrack.fromJson(track))
+            .toList(),
       );
-
-      final tracksJson = _handleResponse(response);
-      final items = tracksJson['tracks'] as List<dynamic>;
-
-      return items.map((track) => SpotifyTrack.fromJson(track)).toList();
-    } catch (e) {
-      if (e is UnauthorizedException || e is SpotifyClientException) {
-        rethrow;
-      } else {
-        throw SpotifyClientException('Failed to fetch tracks: $e');
-      }
-    }
-  }
-
-  Map<String, dynamic> _handleResponse(http.Response response,
-      {int expectedStatusCode = 200}) {
-    if (response.statusCode == expectedStatusCode) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
-    } else if (response.statusCode == 401) {
-      throw UnauthorizedException();
-    } else {
-      throw SpotifyClientException(
-          'Failed to fetch data (${response.statusCode}): ${response.body}');
-    }
-  }
 }
