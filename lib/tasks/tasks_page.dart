@@ -24,7 +24,13 @@ class TasksPage extends StatelessWidget {
         ),
         BlocListener<TasksCubit, TasksState>(
           listener: (context, state) {
-            if (state is TasksDeletionError) {
+            if (state is TasksLoadingError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('An error occurred while loading tasks.'),
+                ),
+              );
+            } else if (state is TasksDeletionError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('An error occurred while deleting the task.'),
@@ -80,14 +86,16 @@ class TasksPage extends StatelessWidget {
       builder: (context, state) {
         if (state is TasksLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (state is TasksLoadingSuccess ||
-            state is TasksDeletionError) {
-          return _buildTasksView(context, state.tasks, state.userPlaylists);
-        } else {
-          return const Center(
-            child: Text('An error occurred while loading tasks.'),
-          );
+        } else if (state is TasksLoadingError) {
+          return Center(
+              child: ElevatedButton.icon(
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
+            onPressed: () => context.read<TasksCubit>().fetchTasks(),
+          ));
         }
+
+        return _buildTasksView(context, state.tasks, state.userPlaylists);
       },
     );
   }
