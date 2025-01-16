@@ -20,7 +20,7 @@ class TaskRequestDto {
       'name': name,
       'platform': platform,
       'executionIntervalDays': executionIntervalDays,
-      'checkFrom': checkFrom.toUtc().toIso8601String(),
+      'checkFrom': checkFrom.toIso8601String(),
       'active': active,
       'playlistId': playlistId,
     };
