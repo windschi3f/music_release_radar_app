@@ -12,9 +12,10 @@ import 'package:music_release_radar_app/tasks/task_request_dto.dart';
 class TaskClient extends BaseHttpClient {
   final String _endpoint;
 
-  TaskClient() : _endpoint = dotenv.env['TASKS_API_ENDPOINT'] ?? '' {
+  TaskClient()
+      : _endpoint = dotenv.env['MUSIC_RELEASE_RADAR_SERVICE_ENDPOINT'] ?? '' {
     if (_endpoint.isEmpty) {
-      throw TaskClientException('Missing tasks API endpoint in .env file');
+      throw TaskClientException('Missing service endpoint in .env file');
     }
   }
 
@@ -30,11 +31,10 @@ class TaskClient extends BaseHttpClient {
       handleRequest(
         () => http.post(
           Uri.parse('$_endpoint/tasks'),
-          headers: getHeaders(accessToken, includeJson: true),
+          headers: getHeaders(accessToken, contentType: 'application/json'),
           body: jsonEncode(task.toJson()),
         ),
         (json) => Task.fromJson(json),
-        expectedStatus: 201,
       );
 
   Future<void> deleteTask(String accessToken, int taskId) => handleRequest(
@@ -43,7 +43,6 @@ class TaskClient extends BaseHttpClient {
           headers: getHeaders(accessToken),
         ),
         (_) => {},
-        expectedStatus: 204,
       );
 
   Future<void> executeTask(String accessToken, int taskId) => handleRequest(
@@ -52,7 +51,6 @@ class TaskClient extends BaseHttpClient {
           headers: getHeaders(accessToken),
         ),
         (_) => {},
-        expectedStatus: 202,
       );
 
   Future<void> addTaskItems(
@@ -63,11 +61,10 @@ class TaskClient extends BaseHttpClient {
       handleRequest(
         () => http.post(
           Uri.parse('$_endpoint/tasks/$taskId/items'),
-          headers: getHeaders(accessToken, includeJson: true),
+          headers: getHeaders(accessToken, contentType: 'application/json'),
           body: jsonEncode(taskItemDtos.map((item) => item.toJson()).toList()),
         ),
         (_) => {},
-        expectedStatus: 201,
       );
 
   Future<List<TaskItem>> getTaskItems(String accessToken, int taskId) =>

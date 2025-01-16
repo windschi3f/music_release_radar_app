@@ -4,22 +4,21 @@ import 'package:music_release_radar_app/core/unauthorized_exception.dart';
 
 abstract class BaseHttpClient {
   Map<String, String> getHeaders(String accessToken,
-          {bool includeJson = false}) =>
+          {String? contentType}) =>
       {
         'Authorization': 'Bearer $accessToken',
-        if (includeJson) 'Content-Type': 'application/json',
+        if (contentType != null) 'Content-Type': contentType,
       };
 
   Future<T> handleRequest<T>(
     Future<http.Response> Function() requestFn,
     T Function(dynamic json) parseResponse, {
-    int expectedStatus = 200,
     bool returnRawResponse = false,
   }) async {
     try {
       final response = await requestFn();
 
-      if (response.statusCode == expectedStatus) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         if (response.statusCode == 204 || response.body.isEmpty) {
           return parseResponse(null);
         }

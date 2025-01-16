@@ -17,7 +17,6 @@ class TaskFormCubit extends Cubit<TaskFormState> {
   final SpotifyClient _spotifyClient;
   final RetryPolicy _retryPolicy;
   final AuthCubit _authCubit;
-  final TokenService _tokenService;
   final TaskClient _taskClient;
 
   TaskFormCubit({
@@ -29,7 +28,6 @@ class TaskFormCubit extends Cubit<TaskFormState> {
         _retryPolicy = RetryPolicy(tokenService, spotifyClient),
         _authCubit = authCubit,
         _taskClient = taskClient,
-        _tokenService = tokenService,
         super(TaskFormInitial());
 
   void navigateForward() {
@@ -133,9 +131,6 @@ class TaskFormCubit extends Cubit<TaskFormState> {
       checkFrom: checkFrom,
       executionIntervalDays: executionIntervalDays,
       playlistId: state.formData.selectedPlaylist!.id,
-      refreshToken: await _tokenService
-          .retrieveTokens()
-          .then((tokens) => tokens[TokenService.refreshTokenKey]!),
     );
 
     try {

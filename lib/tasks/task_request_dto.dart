@@ -5,7 +5,6 @@ class TaskRequestDto {
   final DateTime checkFrom;
   final bool active;
   final String playlistId;
-  final String refreshToken;
 
   TaskRequestDto({
     required this.name,
@@ -14,7 +13,6 @@ class TaskRequestDto {
     required this.checkFrom,
     this.active = true,
     required this.playlistId,
-    required this.refreshToken,
   });
 
   Map<String, dynamic> toJson() {
@@ -25,7 +23,6 @@ class TaskRequestDto {
       'checkFrom': checkFrom.toUtc().toIso8601String(),
       'active': active,
       'playlistId': playlistId,
-      'refreshToken': refreshToken,
     };
   }
 }

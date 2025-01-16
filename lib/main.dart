@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:music_release_radar_app/auth/auth_client.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
 import 'package:music_release_radar_app/core/token_service.dart';
 import 'package:music_release_radar_app/auth/auth_page.dart';
@@ -21,7 +22,8 @@ Future<void> main() async {
   await dotenv.load();
 
   final spotifyClient = SpotifyClient();
-  final tokenService = TokenService(FlutterSecureStorage());
+  final authClient = AuthClient();
+  final tokenService = TokenService(FlutterSecureStorage(), authClient);
   final taskClient = TaskClient();
 
   runApp(MyApp(
