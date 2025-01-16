@@ -107,13 +107,14 @@ class TasksPage extends StatelessWidget {
 
   Widget _buildTasksView(BuildContext context, List<Task> tasks,
       List<SpotifyPlaylist> userPlaylists) {
-    return ListView.builder(
+    return RefreshIndicator(
+        onRefresh: () => context.read<TasksCubit>().fetchTasks(),
+        child: ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: tasks.length,
       itemBuilder: (context, index) => Padding(
         padding: const EdgeInsets.only(bottom: 12),
-        child: _buildTaskCard(context, tasks[index], userPlaylists),
-      ),
+                child: _buildTaskCard(context, tasks[index], userPlaylists)))
     );
   }
 
