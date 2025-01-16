@@ -9,6 +9,7 @@ import 'package:music_release_radar_app/core/unauthorized_exception.dart';
 import 'package:music_release_radar_app/spotify/spotify_client.dart';
 import 'package:music_release_radar_app/tasks/added_items/added_item.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_track.dart';
+import 'package:music_release_radar_app/tasks/added_items/added_item_type.dart';
 
 part 'added_items_state.dart';
 
@@ -19,7 +20,7 @@ class AddedItemsCubit extends Cubit<AddedItemsState> {
   final RetryPolicy _retryPolicy;
   final AuthCubit _authCubit;
 
-  List<AddedItem> _addedItems = [];
+  List<AddedItem> _addedTrackItems = [];
   int _currentPage = 0;
 
   AddedItemsCubit({
@@ -32,7 +33,9 @@ class AddedItemsCubit extends Cubit<AddedItemsState> {
         super(AddedItemsInitial());
 
   Future<void> init(List<AddedItem> addedItems) async {
-    _addedItems = addedItems;
+    _addedTrackItems = addedItems
+        .where((item) => item.itemType == AddedItemType.TRACK)
+        .toList();
     _currentPage = 0;
     await fetchAddedItems();
   }
@@ -48,9 +51,9 @@ class AddedItemsCubit extends Cubit<AddedItemsState> {
 
     try {
       final startIndex = _currentPage * _pageSize;
-      final endIndex = min(startIndex + _pageSize, _addedItems.length);
+      final endIndex = min(startIndex + _pageSize, _addedTrackItems.length);
 
-      if (startIndex >= _addedItems.length) {
+      if (startIndex >= _addedTrackItems.length) {
         emit(AddedItemsLoadingSuccess(
           (state is AddedItemsLoadingSuccess
               ? (state as AddedItemsLoadingSuccess).tracks
@@ -60,14 +63,15 @@ class AddedItemsCubit extends Cubit<AddedItemsState> {
         return;
       }
 
-      final itemsToFetch = _addedItems.sublist(startIndex, endIndex);
-      final trackIds =
-          itemsToFetch.map((item) => item.externalId.split(':').last).toList();
+      final trackIds = _addedTrackItems
+          .sublist(startIndex, endIndex)
+          .map((item) => item.externalId)
+          .toList();
 
       final tracks = await _retryPolicy
           .execute((token) => _spotifyClient.getSeveralTracks(token, trackIds));
 
-      final hasReachedMax = endIndex >= _addedItems.length;
+      final hasReachedMax = endIndex >= _addedTrackItems.length;
       _currentPage++;
 
       emit(AddedItemsLoadingSuccess(

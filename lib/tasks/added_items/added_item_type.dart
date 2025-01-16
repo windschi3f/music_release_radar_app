@@ -1,0 +1,1 @@
+enum AddedItemType { ALBUM, TRACK }

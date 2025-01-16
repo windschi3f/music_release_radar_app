@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_playlist.dart';
+import 'package:music_release_radar_app/tasks/added_items/added_item_type.dart';
 import 'package:music_release_radar_app/tasks/added_items/added_items_cubit.dart';
 import 'package:music_release_radar_app/tasks/form/task_form_cubit.dart';
 import 'package:music_release_radar_app/tasks/tasks_cubit.dart';
@@ -221,12 +222,16 @@ class TasksPage extends StatelessWidget {
 
   Widget _buildAddedTrackWidget(BuildContext context, Task task) {
     final colorScheme = Theme.of(context).colorScheme;
+    final addedTrackItems = task.addedItems
+        .where((item) => item.itemType == AddedItemType.TRACK)
+        .toList();
+
     return Material(
       color: colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: () {
-          if (task.addedItems.isNotEmpty) {
+          if (addedTrackItems.isNotEmpty) {
             context.read<AddedItemsCubit>().init(task.addedItems);
             context.go('/tasks/added-items');
           }
@@ -258,7 +263,7 @@ class TasksPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  task.addedItems.length.toString(),
+                  addedTrackItems.length.toString(),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: colorScheme.primary,
                         fontWeight: FontWeight.w600,
@@ -266,7 +271,7 @@ class TasksPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 4),
-              if (task.addedItems.isNotEmpty)
+              if (addedTrackItems.isNotEmpty)
                 Icon(
                   Icons.chevron_right,
                   size: 20,

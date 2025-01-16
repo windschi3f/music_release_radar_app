@@ -1,12 +1,16 @@
+import 'package:music_release_radar_app/tasks/added_items/added_item_type.dart';
+
 class AddedItem {
   final int id;
   final String externalId;
   final DateTime addedAt;
+  final AddedItemType itemType;
 
   AddedItem({
     required this.id,
     required this.externalId,
     required this.addedAt,
+    required this.itemType,
   });
 
   factory AddedItem.fromJson(Map<String, dynamic> json) {
@@ -14,6 +18,8 @@ class AddedItem {
       id: json['id'],
       externalId: json['externalId'],
       addedAt: DateTime.parse(json['addedAt']),
+      itemType: AddedItemType.values.firstWhere(
+          (e) => e.toString() == 'AddedItemType.${json['itemType']}'),
     );
   }
 
