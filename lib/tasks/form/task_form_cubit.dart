@@ -173,6 +173,8 @@ class TaskFormCubit extends Cubit<TaskFormState> {
         await _retryPolicy.execute((token) =>
             _taskClient.addTaskItems(token, task.id,
             selectedArtistIds));
+        _retryPolicy
+            .execute((token) => _taskClient.executeTask(token, task.id));
       } else {
         await _retryPolicy.execute(
           (token) => _taskClient.updateTask(
