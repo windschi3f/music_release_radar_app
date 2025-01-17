@@ -103,8 +103,8 @@ class ArtistsSelectionPage extends StatelessWidget {
       required List<SpotifyArtist> searchResults,
       required List<SpotifyArtist> selectedArtists}) {
     final combinedList = [
-      ...selectedArtists,
-      ...searchResults.where((artist) => !selectedArtists.contains(artist))
+      ...selectedArtists.where((artist) => !searchResults.contains(artist)),
+      ...searchResults
     ];
 
     return ListView.builder(
