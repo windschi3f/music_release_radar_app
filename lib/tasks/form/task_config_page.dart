@@ -16,7 +16,7 @@ class _TaskConfigPageState extends State<TaskConfigPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController checkFromController = TextEditingController();
   final TextEditingController executionIntervalDaysController =
-      TextEditingController(text: '7');
+      TextEditingController();
   DateTime _selectedDate = DateTime.now();
 
   @override
@@ -61,16 +61,20 @@ class _TaskConfigPageState extends State<TaskConfigPage> {
               }
             }),
           ],
-          child: Scaffold(
-            appBar: _buildAppBar(context),
-            body: _buildBody(context),
-          ),
-        ));
+            child: BlocBuilder<TaskFormCubit, TaskFormState>(
+                builder: (context, state) {
+              return Scaffold(
+                appBar: _buildAppBar(context, state),
+                body: _buildBody(context, state),
+              );
+            })));
   }
 
-  AppBar _buildAppBar(BuildContext context) {
+  AppBar _buildAppBar(BuildContext context, TaskFormState state) {
     return AppBar(
-      title: const Text('Create Task'),
+      title: state.formData.modifyTask != null
+          ? const Text('Update Task')
+          : const Text('Create Task'),
       actions: [
         IconButton(
           icon: const Icon(Icons.save),
@@ -97,7 +101,33 @@ class _TaskConfigPageState extends State<TaskConfigPage> {
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildBody(BuildContext context, TaskFormState state) {
+    if (state is TaskConfigState) {
+      if (state.formData.modifyTask != null && nameController.text.isEmpty) {
+        nameController.text = state.formData.modifyTask!.name;
+        checkFromController.text = MaterialLocalizations.of(context)
+            .formatCompactDate(state.formData.modifyTask!.checkFrom);
+        executionIntervalDaysController.text =
+            state.formData.modifyTask!.executionIntervalDays.toString();
+      }
+
+      if (executionIntervalDaysController.text.isEmpty) {
+        executionIntervalDaysController.text = '7';
+      }
+
+      return _buildForm(context);
+    } else if (state is TaskFormLoading || state is TaskFormSaved) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      return const Center(
+        child: Text('An error occurred. Please try again.'),
+      );
+    }
+  }
+
+  Widget _buildForm(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(

@@ -10,22 +10,26 @@ class TaskFormData {
   final List<SpotifyArtist> selectedArtists;
   final List<SpotifyPlaylist> userPlaylists;
   final SpotifyPlaylist? selectedPlaylist;
+  final Task? modifyTask;
 
   const TaskFormData({
     this.selectedArtists = const [],
     this.userPlaylists = const [],
     this.selectedPlaylist,
+    this.modifyTask,
   });
 
   TaskFormData copyWith({
     List<SpotifyArtist>? selectedArtists,
     List<SpotifyPlaylist>? userPlaylists,
     SpotifyPlaylist? selectedPlaylist,
+    Task? modifyTask,
   }) {
     return TaskFormData(
       selectedArtists: selectedArtists ?? this.selectedArtists,
       userPlaylists: userPlaylists ?? this.userPlaylists,
       selectedPlaylist: selectedPlaylist ?? this.selectedPlaylist,
+      modifyTask: modifyTask ?? this.modifyTask,
     );
   }
 }

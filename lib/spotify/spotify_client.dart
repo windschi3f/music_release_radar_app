@@ -79,6 +79,27 @@ class SpotifyClient extends BaseHttpClient {
             .toList(),
       );
 
+  Future<List<SpotifyArtist>> getSeveralArtists(
+      String accessToken, List<String> artistIds) {
+    final chunkSize = 50;
+    final chunks = <List<String>>[];
+    for (var i = 0; i < artistIds.length; i += chunkSize) {
+      chunks.add(artistIds.sublist(i,
+          i + chunkSize > artistIds.length ? artistIds.length : i + chunkSize));
+    }
+
+    return Future.wait(chunks.map((chunk) => handleRequest(
+              () => http.get(
+                Uri.parse('$_endpoint/artists?ids=${chunk.join(",")}'),
+                headers: getHeaders(accessToken),
+              ),
+              (json) => (json['artists'] as List)
+                  .map((artist) => SpotifyArtist.fromJson(artist))
+                  .toList(),
+            )))
+        .then((responses) => responses.expand((element) => element).toList());
+  }      
+
   Future<List<SpotifyPlaylist>> getUserPlaylists(String accessToken) =>
       handleRequest(
         () => http.get(
@@ -100,5 +121,5 @@ class SpotifyClient extends BaseHttpClient {
         (json) => (json['tracks'] as List)
             .map((track) => SpotifyTrack.fromJson(track))
             .toList(),
-      );
+      );      
 }

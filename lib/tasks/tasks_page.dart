@@ -193,14 +193,23 @@ class TasksPage extends StatelessWidget {
           ),
         ),
         PopupMenuItem<String>(
+          onTap: () {
+            context.read<TaskFormCubit>().modifyTask(task);
+            context.go('/tasks/form/artists-selection');
+          },
+          enabled: !task.processing,
+          child: ListTile(
+            leading: Icon(Icons.edit),
+            title: Text('Edit Task'),
+          ),
+        ),
+        PopupMenuItem<String>(
           onTap: () => _showDeleteConfirmationDialog(context, task),
           enabled: !task.processing,
           child: ListTile(
             leading: Icon(Icons.delete,
                 color: task.processing ? Colors.grey : Colors.red),
-            title: Text('Delete Task',
-                style: TextStyle(
-                    color: task.processing ? Colors.grey : Colors.red)),
+            title: Text('Delete Task'),
           ),
         ),
       ],

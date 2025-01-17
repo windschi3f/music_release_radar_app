@@ -37,6 +37,16 @@ class TaskClient extends BaseHttpClient {
         (json) => Task.fromJson(json),
       );
 
+  Future<Task> updateTask(String accessToken, int id, TaskRequestDto task) =>
+      handleRequest(
+        () => http.put(
+          Uri.parse('$_endpoint/tasks/$id'),
+          headers: getHeaders(accessToken, contentType: 'application/json'),
+          body: jsonEncode(task.toJson()),
+        ),
+        (json) => Task.fromJson(json),
+      );
+
   Future<void> deleteTask(String accessToken, int taskId) => handleRequest(
         () => http.delete(
           Uri.parse('$_endpoint/tasks/$taskId'),
@@ -60,6 +70,20 @@ class TaskClient extends BaseHttpClient {
   ) =>
       handleRequest(
         () => http.post(
+          Uri.parse('$_endpoint/tasks/$taskId/items'),
+          headers: getHeaders(accessToken, contentType: 'application/json'),
+          body: jsonEncode(taskItemDtos.map((item) => item.toJson()).toList()),
+        ),
+        (_) => {},
+      );
+
+  Future<void> updateTaskItems(
+    String accessToken,
+    int taskId,
+    List<TaskItemRequestDto> taskItemDtos,
+  ) =>
+      handleRequest(
+        () => http.put(
           Uri.parse('$_endpoint/tasks/$taskId/items'),
           headers: getHeaders(accessToken, contentType: 'application/json'),
           body: jsonEncode(taskItemDtos.map((item) => item.toJson()).toList()),
