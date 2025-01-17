@@ -76,11 +76,15 @@ class TasksPage extends StatelessWidget {
                   ListTile(leading: Icon(Icons.logout), title: Text('Logout')),
             ),
           ],
-          child: user.images.isNotEmpty
-              ? CircleAvatar(
-                  backgroundImage: NetworkImage(user.images.first.url),
-                )
-              : const Icon(Icons.account_circle),
+          
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: user.images.isNotEmpty
+                ? CircleAvatar(
+                    backgroundImage: NetworkImage(user.images.first.url),
+                  )
+                : const Icon(Icons.account_circle),
+          ),
         ),
       ],
     );
