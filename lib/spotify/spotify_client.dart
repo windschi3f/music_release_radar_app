@@ -112,14 +112,23 @@ class SpotifyClient extends BaseHttpClient {
       );
 
   Future<List<SpotifyTrack>> getSeveralTracks(
-          String accessToken, List<String> trackIds) =>
-      handleRequest(
-        () => http.get(
-          Uri.parse('$_endpoint/tracks?ids=${trackIds.join(",")}'),
-          headers: getHeaders(accessToken),
-        ),
-        (json) => (json['tracks'] as List)
-            .map((track) => SpotifyTrack.fromJson(track))
-            .toList(),
-      );      
+      String accessToken, List<String> trackIds) {
+    final chunkSize = 50;
+    final chunks = <List<String>>[];
+    for (var i = 0; i < trackIds.length; i += chunkSize) {
+      chunks.add(trackIds.sublist(i,
+          i + chunkSize > trackIds.length ? trackIds.length : i + chunkSize));
+    }
+
+    return Future.wait(chunks.map((chunk) => handleRequest(
+              () => http.get(
+                Uri.parse('$_endpoint/tracks?ids=${chunk.join(",")}'),
+                headers: getHeaders(accessToken),
+              ),
+              (json) => (json['tracks'] as List)
+                  .map((track) => SpotifyTrack.fromJson(track))
+                  .toList(),
+            )))
+        .then((responses) => responses.expand((element) => element).toList());
+  }            
 }
