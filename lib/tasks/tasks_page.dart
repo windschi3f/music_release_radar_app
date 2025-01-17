@@ -168,16 +168,8 @@ class TasksPage extends StatelessWidget {
                 ]),
               ],
             ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Transform.scale(
-                  scale: 0.8,
-                  child: Switch(value: task.active, onChanged: (bool value) {}),
-                ),
+            trailing:
                 _buildPopupMenu(context, task),
-              ],
-            ),
           ),
           _buildTaskInfosView(context, task),
         ],
