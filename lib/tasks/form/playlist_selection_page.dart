@@ -40,25 +40,7 @@ class PlaylistSelectionPage extends StatelessWidget {
   }
 
   AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      title: Text('Select Playlist'),
-      actions: [
-        BlocBuilder<TaskFormCubit, TaskFormState>(
-          builder: (context, state) {
-            if (state is PlaylistSelectionState &&
-                state.formData.selectedPlaylist != null) {
-              return IconButton(
-                  icon: Icon(Icons.arrow_forward),
-                  onPressed: () {
-                    context.read<TaskFormCubit>().navigateForward();
-                    context.push('/tasks/form/task-config');
-                  });
-            }
-            return SizedBox.shrink();
-          },
-        ),
-      ],
-    );
+    return AppBar(title: Text('Select Playlist'));
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
@@ -126,19 +108,19 @@ class PlaylistSelectionPage extends StatelessWidget {
         final SpotifyPlaylist playlist = playlistsToShow[index];
 
         return ListTile(
-          leading: playlist.images.isNotEmpty
-              ? CircleAvatar(
-                  backgroundImage: NetworkImage(playlist.images.first.url),
-                )
-              : const CircleAvatar(child: Icon(Icons.playlist_play)),
-          title: Text(playlist.name),
-          subtitle: Text(
-              '${playlist.isPublic ? 'Public' : 'Private'} - ${playlist.trackCount} tracks'),
-          selected: selectedPlaylist == playlist,
-          selectedColor: Theme.of(context).colorScheme.onPrimaryContainer,
-          selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
-          onTap: () => context.read<TaskFormCubit>().selectPlaylist(playlist),
-        );
+            leading: playlist.images.isNotEmpty
+                ? CircleAvatar(
+                    backgroundImage: NetworkImage(playlist.images.first.url),
+                  )
+                : const CircleAvatar(child: Icon(Icons.playlist_play)),
+            title: Text(playlist.name),
+            subtitle: Text(
+                '${playlist.isPublic ? 'Public' : 'Private'} - ${playlist.trackCount} tracks'),
+            onTap: () {
+              context.read<TaskFormCubit>().selectPlaylist(playlist);
+              context.read<TaskFormCubit>().navigateForward();
+              context.push('/tasks/form/task-config');
+            });
       },
     );
   }
