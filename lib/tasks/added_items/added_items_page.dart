@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_track.dart';
 import 'added_items_cubit.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddedItemsPage extends StatelessWidget {
   const AddedItemsPage({super.key});
@@ -9,7 +10,7 @@ class AddedItemsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Added Tracks')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.addedTracks)),
       body: BlocBuilder<AddedItemsCubit, AddedItemsState>(
         builder: (context, state) {
           if (state is AddedItemsLoading) {
@@ -18,7 +19,8 @@ class AddedItemsPage extends StatelessWidget {
           } else if (state is AddedItemsLoadingSuccess) {
             return _buildTracksList(state);
           }
-          return Center(child: Text('Loading failed'));
+          return Center(
+              child: Text(AppLocalizations.of(context)!.loadingFailed));
         },
       ),
     );

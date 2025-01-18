@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
 import 'package:music_release_radar_app/tasks/form/task_form_cubit.dart';
 import 'package:music_release_radar_app/tasks/tasks_cubit.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TaskConfigPage extends StatefulWidget {
   const TaskConfigPage({super.key});
@@ -52,7 +53,7 @@ class _TaskConfigPageState extends State<TaskConfigPage> {
                 listener: (context, state) {
               if (state is TaskFormError) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text("An error occurred. Please try again."),
+                    content: Text(AppLocalizations.of(context)!.errorOccurred),
                   backgroundColor: Theme.of(context).colorScheme.error,
                 ));
               } else if (state is TaskFormSaved) {
@@ -73,8 +74,8 @@ class _TaskConfigPageState extends State<TaskConfigPage> {
   AppBar _buildAppBar(BuildContext context, TaskFormState state) {
     return AppBar(
       title: state.formData.modifyTask != null
-          ? const Text('Update Task')
-          : const Text('Create Task'),
+          ? Text(AppLocalizations.of(context)!.updateTask)
+          : Text(AppLocalizations.of(context)!.createTask),
       actions: [
         IconButton(
           icon: const Icon(Icons.save),
@@ -121,8 +122,8 @@ class _TaskConfigPageState extends State<TaskConfigPage> {
         child: CircularProgressIndicator(),
       );
     } else {
-      return const Center(
-        child: Text('An error occurred. Please try again.'),
+      return Center(
+        child: Text(AppLocalizations.of(context)!.errorOccurred),
       );
     }
   }
@@ -134,11 +135,13 @@ class _TaskConfigPageState extends State<TaskConfigPage> {
         children: [
           TextField(
             controller: nameController,
-            decoration: const InputDecoration(labelText: 'Name'),
+            decoration:
+                InputDecoration(labelText: AppLocalizations.of(context)!.name),
           ),
           TextField(
             controller: checkFromController,
-            decoration: const InputDecoration(labelText: 'Check From'),
+            decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.checkFrom),
             keyboardType: TextInputType.datetime,
             readOnly: true,
             onTap: () async {
@@ -160,7 +163,8 @@ class _TaskConfigPageState extends State<TaskConfigPage> {
           TextField(
             controller: executionIntervalDaysController,
             decoration:
-                const InputDecoration(labelText: 'Execution Interval Days'),
+                InputDecoration(
+                labelText: AppLocalizations.of(context)!.executionIntervalDays),
             keyboardType: TextInputType.number,
           ),
         ],
@@ -170,12 +174,12 @@ class _TaskConfigPageState extends State<TaskConfigPage> {
 
   String? _validateForm() {
     if (nameController.text.isEmpty) {
-      return 'Name is required';
+      return AppLocalizations.of(context)!.nameRequired;
     }
 
     final intervalDays = int.tryParse(executionIntervalDaysController.text);
     if (intervalDays == null || intervalDays <= 0) {
-      return 'Execution interval must be a positive number';
+      return AppLocalizations.of(context)!.executionIntervalPositive;
     }
 
     return null;

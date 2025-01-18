@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AuthPage extends StatelessWidget {
   const AuthPage({super.key});
@@ -33,7 +34,7 @@ class AuthPage extends StatelessWidget {
       return Center(
         child: ElevatedButton(
           onPressed: () => context.read<AuthCubit>().authenticate(),
-          child: const Text('Login with Spotify'),
+          child: Text(AppLocalizations.of(context)!.loginWithSpotify),
         ),
       );
     }

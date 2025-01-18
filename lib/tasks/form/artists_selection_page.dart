@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_artist.dart';
 import 'package:music_release_radar_app/tasks/form/task_form_cubit.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ArtistsSelectionPage extends StatelessWidget {
   const ArtistsSelectionPage({super.key});
@@ -24,7 +25,7 @@ class ArtistsSelectionPage extends StatelessWidget {
                 listener: (context, state) {
               if (state is TaskFormError) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text("An error occurred. Please try again."),
+                  content: Text(AppLocalizations.of(context)!.errorOccurred),
                   backgroundColor: Theme.of(context).colorScheme.error,
                 ));
               }
@@ -39,7 +40,7 @@ class ArtistsSelectionPage extends StatelessWidget {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('Select Artists'),
+      title: Text(AppLocalizations.of(context)!.selectArtists),
       actions: [
         BlocBuilder<TaskFormCubit, TaskFormState>(
           builder: (context, state) {
@@ -66,7 +67,7 @@ class ArtistsSelectionPage extends StatelessWidget {
           padding: EdgeInsets.all(8.0),
           child: TextField(
             decoration: InputDecoration(
-              hintText: 'Search artists...',
+              hintText: AppLocalizations.of(context)!.searchArtists,
               prefixIcon: Icon(Icons.search),
             ),
             onChanged: (query) {

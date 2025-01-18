@@ -5,6 +5,7 @@ import 'package:music_release_radar_app/auth/auth_cubit.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_playlist.dart';
 import 'package:music_release_radar_app/tasks/form/task_form_cubit.dart';
 import 'package:music_release_radar_app/tasks/form/create_playlist_dialog.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PlaylistSelectionPage extends StatelessWidget {
   const PlaylistSelectionPage({super.key});
@@ -25,7 +26,7 @@ class PlaylistSelectionPage extends StatelessWidget {
                 listener: (context, state) {
               if (state is TaskFormError) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text("An error occurred. Please try again."),
+                  content: Text(AppLocalizations.of(context)!.errorOccurred),
                   backgroundColor: Theme.of(context).colorScheme.error,
                 ));
               }
@@ -40,7 +41,7 @@ class PlaylistSelectionPage extends StatelessWidget {
   }
 
   AppBar _buildAppBar(BuildContext context) {
-    return AppBar(title: Text('Select Playlist'));
+    return AppBar(title: Text(AppLocalizations.of(context)!.selectPlaylist));
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
@@ -63,7 +64,7 @@ class PlaylistSelectionPage extends StatelessWidget {
           padding: EdgeInsets.all(8.0),
           child: TextField(
             decoration: InputDecoration(
-              hintText: 'Filter playlists...',
+              hintText: AppLocalizations.of(context)!.filterPlaylists,
               prefixIcon: Icon(Icons.search),
             ),
             onChanged: (query) =>
@@ -115,7 +116,7 @@ class PlaylistSelectionPage extends StatelessWidget {
                 : const CircleAvatar(child: Icon(Icons.playlist_play)),
             title: Text(playlist.name),
             subtitle: Text(
-                '${playlist.isPublic ? 'Public' : 'Private'} - ${playlist.trackCount} tracks'),
+                '${playlist.isPublic ? AppLocalizations.of(context)!.public : AppLocalizations.of(context)!.private} - ${playlist.trackCount} ${AppLocalizations.of(context)!.tracks}'),
             onTap: () {
               context.read<TaskFormCubit>().selectPlaylist(playlist);
               context.read<TaskFormCubit>().navigateForward();

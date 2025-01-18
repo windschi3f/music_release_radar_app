@@ -9,6 +9,7 @@ import 'package:music_release_radar_app/tasks/added_items/added_items_cubit.dart
 import 'package:music_release_radar_app/tasks/form/task_form_cubit.dart';
 import 'package:music_release_radar_app/tasks/tasks_cubit.dart';
 import 'package:music_release_radar_app/tasks/task.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TasksPage extends StatelessWidget {
   const TasksPage({super.key});
@@ -29,20 +30,12 @@ class TasksPage extends StatelessWidget {
               current is TasksLoadingError ||
               current is TasksDeletionError ||
               current is TasksExecutionError,
-          listener: (context, state) {
-            final messages = {
-              TasksLoadingError: 'loading',
-              TasksDeletionError: 'deleting',
-              TasksExecutionError: 'executing'
-            };
-            final action = messages[state.runtimeType] ?? 'processing';
-
+            listener: (context, state) =>
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('An error occurred while $action the task.'),
-              ),
-            );
-          },
+                  content: Text(AppLocalizations.of(context)!.errorOccurred),
+                ))
+          
         ),
       ],
       child: Scaffold(
@@ -63,7 +56,7 @@ class TasksPage extends StatelessWidget {
     final user = context.read<AuthCubit>().user!;
 
     return AppBar(
-      title: const Text('Tasks'),
+      title: Text(AppLocalizations.of(context)!.tasks),
       actions: [
         PopupMenuButton<String>(
           itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -72,11 +65,11 @@ class TasksPage extends StatelessWidget {
             ),
             PopupMenuItem<String>(
               onTap: () => context.read<AuthCubit>().logout(),
-              child:
-                  ListTile(leading: Icon(Icons.logout), title: Text('Logout')),
+              child: ListTile(
+                  leading: Icon(Icons.logout),
+                  title: Text(AppLocalizations.of(context)!.logout)),
             ),
           ],
-          
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: user.images.isNotEmpty
@@ -99,7 +92,7 @@ class TasksPage extends StatelessWidget {
           return Center(
               child: ElevatedButton.icon(
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+            label: Text(AppLocalizations.of(context)!.retry),
             onPressed: () => context.read<TasksCubit>().fetchTasks(),
           ));
         }
@@ -128,7 +121,8 @@ class TasksPage extends StatelessWidget {
         .where((playlist) => playlist.id == task.playlistId)
         .firstOrNull;
 
-    final playlistName = playlist?.name ?? 'Unknown';
+    final playlistName =
+        playlist?.name ?? AppLocalizations.of(context)!.unknown;
     final imageUrl = playlist?.images.firstOrNull?.url;
 
     return Card(
@@ -168,8 +162,7 @@ class TasksPage extends StatelessWidget {
                 ]),
               ],
             ),
-            trailing:
-                _buildPopupMenu(context, task),
+            trailing: _buildPopupMenu(context, task),
           ),
           _buildTaskInfosView(context, task),
         ],
@@ -185,7 +178,7 @@ class TasksPage extends StatelessWidget {
           enabled: !task.processing,
           child: ListTile(
             leading: Icon(Icons.play_arrow),
-            title: Text('Execute Now'),
+            title: Text(AppLocalizations.of(context)!.executeNow),
           ),
         ),
         PopupMenuItem<String>(
@@ -196,7 +189,7 @@ class TasksPage extends StatelessWidget {
           enabled: !task.processing,
           child: ListTile(
             leading: Icon(Icons.edit),
-            title: Text('Edit Task'),
+            title: Text(AppLocalizations.of(context)!.editTask),
           ),
         ),
         PopupMenuItem<String>(
@@ -205,7 +198,7 @@ class TasksPage extends StatelessWidget {
           child: ListTile(
             leading: Icon(Icons.delete,
                 color: task.processing ? Colors.grey : Colors.red),
-            title: Text('Delete Task'),
+            title: Text(AppLocalizations.of(context)!.deleteTask),
           ),
         ),
       ],
@@ -254,7 +247,7 @@ class TasksPage extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               Text(
-                'Added Tracks',
+                AppLocalizations.of(context)!.addedTracks,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.w500,
@@ -265,7 +258,7 @@ class TasksPage extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  color: colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
@@ -309,29 +302,30 @@ class TasksPage extends StatelessWidget {
           children: [
             _buildInfoRow(
               context,
-              'Tracking Artists',
+              AppLocalizations.of(context)!.trackingArtists,
               task.taskItems.length.toString(),
               Icons.person,
             ),
             _buildInfoRow(
               context,
-              'Last Executed',
+              AppLocalizations.of(context)!.lastExecuted,
               task.processing
-                  ? 'Processing'
+                  ? AppLocalizations.of(context)!.processing
                   : _formatDateTime(context, task.lastTimeExecuted),
               Icons.update,
               primaryColor: task.processing,
             ),
             _buildInfoRow(
               context,
-              'Check From',
+              AppLocalizations.of(context)!.checkFrom,
               _formatDate(context, task.checkFrom),
               Icons.calendar_today,
             ),
             _buildInfoRow(
               context,
-              'Execution Interval',
-              'Every ${task.executionIntervalDays} days',
+              AppLocalizations.of(context)!.executionInterval,
+              AppLocalizations.of(context)!
+                  .everyDays(task.executionIntervalDays),
               Icons.timer,
             ),
           ],
@@ -382,15 +376,17 @@ class TasksPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete Task'),
-          content: Text('Are you sure you want to delete "${task.name}"?'),
+          title: Text(AppLocalizations.of(context)!.deleteTask),
+          content: Text(
+              AppLocalizations.of(context)!.deleteTaskConfirmation(task.name)),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel'),
+              child: Text(AppLocalizations.of(context)!.cancel),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              child: Text(AppLocalizations.of(context)!.delete,
+                  style: TextStyle(color: Colors.red)),
               onPressed: () {
                 tasksCubit.deleteTask(task);
                 Navigator.of(context).pop();
@@ -404,7 +400,7 @@ class TasksPage extends StatelessWidget {
 
   String _formatDate(BuildContext context, DateTime? date) {
     if (date == null) {
-      return 'never';
+      return AppLocalizations.of(context)!.never;
     }
     final locale = Localizations.localeOf(context).toString();
     final dateFormatter = DateFormat.yMMMd(locale);
@@ -413,7 +409,7 @@ class TasksPage extends StatelessWidget {
 
   String _formatDateTime(BuildContext context, DateTime? date) {
     if (date == null) {
-      return 'never';
+      return AppLocalizations.of(context)!.never;
     }
     final locale = Localizations.localeOf(context).toString();
     final dateFormatter = DateFormat.yMMMd(locale);

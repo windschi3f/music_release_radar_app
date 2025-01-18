@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:music_release_radar_app/tasks/form/task_form_cubit.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CreatePlaylistDialog extends StatefulWidget {
   final TaskFormCubit taskFormCubit;
@@ -17,12 +18,13 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Create Playlist'),
+      title: Text(AppLocalizations.of(context)!.createPlaylist),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
-            decoration: const InputDecoration(labelText: 'Name'),
+            decoration:
+                InputDecoration(labelText: AppLocalizations.of(context)!.name),
             onChanged: (value) {
               setState(() {
                 _playlistName = value;
@@ -32,7 +34,7 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
           const SizedBox(height: 8.0),
           Row(
             children: [
-              const Text('Public'),
+              Text(AppLocalizations.of(context)!.public),
               const Spacer(),
               Checkbox(
                 value: _isPublic,
@@ -49,14 +51,14 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         TextButton(
           onPressed: () {
             widget.taskFormCubit.createPlaylist(_playlistName, _isPublic);
             Navigator.of(context).pop();
           },
-          child: const Text('Create'),
+          child: Text(AppLocalizations.of(context)!.create),
         ),
       ],
     );
