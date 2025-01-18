@@ -15,6 +15,7 @@ class SpotifyClient extends BaseHttpClient {
   static const String _tokenEndpoint = 'https://accounts.spotify.com/api/token';
   static const String _endpoint = 'https://api.spotify.com/v1';
   static const List<String> _scopes = [
+    'playlist-read-private',
     'playlist-modify-private',
     'playlist-modify-public'
   ];
@@ -109,6 +110,17 @@ class SpotifyClient extends BaseHttpClient {
         (json) => (json['items'] as List)
             .map((playlist) => SpotifyPlaylist.fromJson(playlist))
             .toList(),
+      );
+
+  Future<void> createPlaylist(String accessToken, String userId,
+          String playlistName, bool isPublic) =>
+      handleRequest(
+        () => http.post(
+          Uri.parse('$_endpoint/users/$userId/playlists'),
+          headers: getHeaders(accessToken, contentType: 'application/json'),
+          body: '{"name":"$playlistName","public":$isPublic}',
+        ),
+        (_) => {},
       );
 
   Future<List<SpotifyTrack>> getSeveralTracks(

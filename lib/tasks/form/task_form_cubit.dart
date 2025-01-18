@@ -113,12 +113,6 @@ class TaskFormCubit extends Cubit<TaskFormState> {
   }
 
   Future<void> loadPlaylistSelection() async {
-    if (state.formData.userPlaylists.isNotEmpty) {
-      emit(
-          PlaylistSelectionState(state.formData, state.formData.userPlaylists));
-      return;
-    }
-
     emit(TaskFormLoading(state.formData));
     try {
       final userPlaylists = await _retryPolicy.execute(
@@ -149,6 +143,23 @@ class TaskFormCubit extends Cubit<TaskFormState> {
     emit(PlaylistSelectionState(state.formData, filteredPlaylists));
   }
 
+  void createPlaylist(String name, bool isPublic) async {
+    emit(TaskFormLoading(state.formData));
+
+    try {
+      final user = _authCubit.user!;
+      await _retryPolicy.execute(
+        (token) =>
+            _spotifyClient.createPlaylist(token, user.id, name, isPublic),
+      );
+      loadPlaylistSelection();
+    } on UnauthorizedException {
+      _authCubit.logout();
+    } on Exception catch (e) {
+      emit(TaskFormError(state.formData, e.toString()));
+    }
+  }
+
   void saveTask(
       {required String name,
       required DateTime checkFrom,
@@ -171,8 +182,7 @@ class TaskFormCubit extends Cubit<TaskFormState> {
           (token) => _taskClient.createTask(token, taskRequestDto),
         );
         await _retryPolicy.execute((token) =>
-            _taskClient.addTaskItems(token, task.id,
-            selectedArtistIds));
+            _taskClient.addTaskItems(token, task.id, selectedArtistIds));
         _retryPolicy
             .execute((token) => _taskClient.executeTask(token, task.id));
       } else {

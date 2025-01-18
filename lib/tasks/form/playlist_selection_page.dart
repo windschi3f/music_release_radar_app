@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:music_release_radar_app/auth/auth_cubit.dart';
 import 'package:music_release_radar_app/spotify/model/spotify_playlist.dart';
 import 'package:music_release_radar_app/tasks/form/task_form_cubit.dart';
+import 'package:music_release_radar_app/tasks/form/create_playlist_dialog.dart';
 
 class PlaylistSelectionPage extends StatelessWidget {
   const PlaylistSelectionPage({super.key});
@@ -33,6 +34,7 @@ class PlaylistSelectionPage extends StatelessWidget {
           child: Scaffold(
             appBar: _buildAppBar(context),
             body: _buildBody(context),
+            floatingActionButton: _buildFloatingActionButton(context),
           ),
         ));
   }
@@ -56,6 +58,19 @@ class PlaylistSelectionPage extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildFloatingActionButton(BuildContext context) {
+    final TaskFormCubit taskFormCubit = context.read<TaskFormCubit>();
+
+    return FloatingActionButton(
+      onPressed: () => showDialog(
+        context: context,
+        builder: (context) =>
+            CreatePlaylistDialog(taskFormCubit: taskFormCubit),
+      ),
+      child: Icon(Icons.add),
     );
   }
 

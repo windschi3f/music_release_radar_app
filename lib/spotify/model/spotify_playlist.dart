@@ -22,9 +22,10 @@ class SpotifyPlaylist {
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
-      images: (json['images'] as List<dynamic>)
-          .map((e) => Image.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      images: (json['images'] as List<dynamic>?)
+              ?.map((e) => Image.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       isPublic: json['public'] as bool,
       trackCount: json['tracks']['total'] as int,
     );
