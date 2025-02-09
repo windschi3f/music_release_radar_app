@@ -49,8 +49,28 @@ class TaskFormError extends TaskFormState {
 
 class ArtistSelectionState extends TaskFormState {
   final List<SpotifyArtist> searchResults;
+  final List<SpotifyArtist> followedArtists;
+  final bool isFollowedArtistsMode;
+  final String searchQuery;
 
-  const ArtistSelectionState(super.formData, this.searchResults);
+  const ArtistSelectionState(super.formData, this.searchResults,
+      this.followedArtists, this.isFollowedArtistsMode, this.searchQuery);
+
+  ArtistSelectionState copyWith({
+    TaskFormData? formData,
+    List<SpotifyArtist>? searchResults,
+    List<SpotifyArtist>? followedArtists,
+    bool? isFollowedArtistsMode,
+    String? searchQuery,
+  }) {
+    return ArtistSelectionState(
+      formData ?? this.formData,
+      searchResults ?? this.searchResults,
+      followedArtists ?? this.followedArtists,
+      isFollowedArtistsMode ?? this.isFollowedArtistsMode,
+      searchQuery ?? this.searchQuery,
+    );
+  }
 }
 
 class PlaylistSelectionState extends TaskFormState {

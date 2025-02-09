@@ -33,7 +33,7 @@ class TaskFormCubit extends Cubit<TaskFormState> {
 
   void navigateForward() {
     if (state is TaskFormInitial || state is TaskFormSaved) {
-      emit(ArtistSelectionState(TaskFormData(), []));
+      emit(ArtistSelectionState(TaskFormData(), [], [], false, ""));
     } else if (state is ArtistSelectionState) {
       loadPlaylistSelection();
     } else if (state is PlaylistSelectionState) {
@@ -45,7 +45,7 @@ class TaskFormCubit extends Cubit<TaskFormState> {
     if (state is ArtistSelectionState) {
       emit(TaskFormInitial());
     } else if (state is PlaylistSelectionState) {
-      emit(ArtistSelectionState(state.formData, []));
+      emit(ArtistSelectionState(state.formData, [], [], false, ""));
     } else if (state is TaskConfigState) {
       emit(
           PlaylistSelectionState(state.formData, state.formData.userPlaylists));
@@ -72,7 +72,10 @@ class TaskFormCubit extends Cubit<TaskFormState> {
                 (p) => p.id == task.playlistId,
               ),
               modifyTask: task),
-          []));
+          [],
+          [],
+          false,
+          ""));
     } on UnauthorizedException {
       _authCubit.logout();
     } on Exception catch (e) {
@@ -80,18 +83,38 @@ class TaskFormCubit extends Cubit<TaskFormState> {
     }
   }
 
+  void onSearchQueryChanged(String query) async {
+    if (state is! ArtistSelectionState) return;
+
+    final currentState = state as ArtistSelectionState;
+
+    if (currentState.isFollowedArtistsMode) {
+      filterFollowedArtists(query);
+    } else {
+      searchArtists(query);
+    }
+  }
+
   void searchArtists(String query) async {
+    if (state is! ArtistSelectionState) return;
+    final currentState = state as ArtistSelectionState;
+
     if (query.isEmpty) {
-      emit(ArtistSelectionState(state.formData, []));
+      emit(currentState.copyWith(
+        searchResults: [],
+        searchQuery: query,
+      ));
       return;
     }
-
     emit(TaskFormLoading(state.formData));
     try {
       final artists = await _retryPolicy.execute(
         (token) => _spotifyClient.searchArtists(token, query),
       );
-      emit(ArtistSelectionState(state.formData, artists));
+      emit(currentState.copyWith(
+        searchResults: artists,
+        searchQuery: query,
+      ));
     } on UnauthorizedException {
       _authCubit.logout();
     } on Exception catch (e) {
@@ -99,17 +122,86 @@ class TaskFormCubit extends Cubit<TaskFormState> {
     }
   }
 
+  void filterFollowedArtists(String query) {
+    if (state is! ArtistSelectionState) return;
+    final currentState = state as ArtistSelectionState;
+
+    final filteredArtists = currentState.followedArtists
+        .where(
+            (artist) => artist.name.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+
+    emit(currentState.copyWith(
+      searchResults: filteredArtists,
+      searchQuery: query,
+    ));
+  }
+
+  void toggleFollowedArtistsMode() async {
+    if (state is! ArtistSelectionState) return;
+    final currentState = state as ArtistSelectionState;
+    final query = currentState.searchQuery;
+
+    if (!currentState.isFollowedArtistsMode) {
+      if (currentState.followedArtists.isEmpty) {
+        emit(TaskFormLoading(state.formData));
+        try {
+          final followedArtists = await _retryPolicy.execute(
+            (token) => _spotifyClient.getUserFollowedArtists(token),
+          );
+          final filtered = query.isEmpty
+              ? followedArtists
+              : followedArtists
+                  .where((artist) =>
+                      artist.name.toLowerCase().contains(query.toLowerCase()))
+                  .toList();
+          emit(currentState.copyWith(
+            searchResults: filtered,
+            followedArtists: followedArtists,
+            isFollowedArtistsMode: true,
+          ));
+        } on UnauthorizedException {
+          _authCubit.logout();
+        } on Exception catch (e) {
+          emit(TaskFormError(state.formData, e.toString()));
+        }
+      } else {
+        final filtered = query.isEmpty
+            ? currentState.followedArtists
+            : currentState.followedArtists
+                .where((artist) =>
+                    artist.name.toLowerCase().contains(query.toLowerCase()))
+                .toList();
+        emit(currentState.copyWith(
+          searchResults: filtered,
+          isFollowedArtistsMode: true,
+        ));
+      }
+    } else {
+      emit(currentState.copyWith(
+        isFollowedArtistsMode: false,
+        searchResults: [],
+      ));
+      if (query.isNotEmpty) {
+        searchArtists(query);
+      }
+    }
+}
+
   void toggleArtistSelection(SpotifyArtist artist) {
     final selectedArtists = state.formData.selectedArtists;
-
     final isSelected = selectedArtists.contains(artist);
     final updatedSelection = isSelected
         ? selectedArtists.where((a) => a.id != artist.id).toList()
         : [...selectedArtists, artist];
 
+    final artistSelectionState = state as ArtistSelectionState;
     emit(ArtistSelectionState(
         state.formData.copyWith(selectedArtists: updatedSelection),
-        (state as ArtistSelectionState).searchResults));
+        artistSelectionState.searchResults,
+        artistSelectionState.followedArtists,
+        artistSelectionState.isFollowedArtistsMode,
+        artistSelectionState.searchQuery));
   }
 
   Future<void> loadPlaylistSelection() async {

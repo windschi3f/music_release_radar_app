@@ -35,5 +35,7 @@
   "private": "Privat",
   "tracks": "Titel",
   "createPlaylist": "Playlist erstellen",
-  "create": "Erstellen"
+  "create": "Erstellen",
+  "followedArtists": "Gefolgte Künstler",
+  "filterFollowedArtists": "Gefolgte Künstler filtern"
 }

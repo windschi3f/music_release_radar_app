@@ -17,7 +17,8 @@ class SpotifyClient extends BaseHttpClient {
   static const List<String> _scopes = [
     'playlist-read-private',
     'playlist-modify-private',
-    'playlist-modify-public'
+    'playlist-modify-public',
+    'user-follow-read'
   ];
 
   final String _clientId;
@@ -99,17 +100,26 @@ class SpotifyClient extends BaseHttpClient {
                   .toList(),
             )))
         .then((responses) => responses.expand((element) => element).toList());
-  }      
+  }
+
+  Future<List<SpotifyArtist>> getUserFollowedArtists(String accessToken) =>
+      handleRequestWithNextPages(
+        '$_endpoint/me/following?type=artist&limit=50',
+        (json) => (json['items'] as List)
+            .map((artist) => SpotifyArtist.fromJson(artist))
+            .toList(),
+        accessToken,
+        getItems: (json) => json['artists']['items'],
+        getNext: (json) => json['artists']['next'],
+      );
 
   Future<List<SpotifyPlaylist>> getUserPlaylists(String accessToken) =>
-      handleRequest(
-        () => http.get(
-          Uri.parse('$_endpoint/me/playlists'),
-          headers: getHeaders(accessToken),
-        ),
+      handleRequestWithNextPages(
+        '$_endpoint/me/playlists?limit=50',
         (json) => (json['items'] as List)
             .map((playlist) => SpotifyPlaylist.fromJson(playlist))
             .toList(),
+        accessToken,
       );
 
   Future<void> createPlaylist(String accessToken, String userId,

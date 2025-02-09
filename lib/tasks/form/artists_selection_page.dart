@@ -61,41 +61,61 @@ class ArtistsSelectionPage extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(8.0),
-          child: TextField(
+    return BlocBuilder<TaskFormCubit, TaskFormState>(builder: (context, state) {
+      return Column(
+        children: [
+          _buildArtistSearch(context, state),
+          Expanded(
+              child: Stack(
+            children: [
+              _buildArtistSelectionList(
+                  context: context,
+                  searchResults:
+                      state is ArtistSelectionState ? state.searchResults : [],
+                  selectedArtists: state is ArtistSelectionState
+                      ? state.formData.selectedArtists
+                      : []),
+              if (state is TaskFormLoading)
+                const Center(child: CircularProgressIndicator()),
+            ],
+          ))
+        ],
+      );
+    });
+  }
+
+  Widget _buildArtistSearch(BuildContext context, TaskFormState state) {
+    bool isFollowedArtistsMode =
+        state is ArtistSelectionState ? state.isFollowedArtistsMode : false;
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.searchArtists,
+              hintText: isFollowedArtistsMode
+                  ? AppLocalizations.of(context)!.filterFollowedArtists
+                  : AppLocalizations.of(context)!.searchArtists,
               prefixIcon: Icon(Icons.search),
             ),
-            onChanged: (query) {
-              context.read<TaskFormCubit>().searchArtists(query);
-            },
+            onChanged: (query) =>
+                context.read<TaskFormCubit>().onSearchQueryChanged(query),
           ),
-        ),
-        Expanded(
-          child: BlocBuilder<TaskFormCubit, TaskFormState>(
-            builder: (context, state) {
-              return Stack(
-                children: [
-                  _buildArtistSelectionList(
-                      context: context,
-                      searchResults: state is ArtistSelectionState
-                          ? state.searchResults
-                          : [],
-                      selectedArtists: state is ArtistSelectionState
-                          ? state.formData.selectedArtists
-                          : []),
-                  if (state is TaskFormLoading)
-                    const Center(child: CircularProgressIndicator()),
-                ],
-              );
-            },
+          SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: [
+              FilterChip(
+                selected: isFollowedArtistsMode,
+                label: Text(AppLocalizations.of(context)!.followedArtists),
+                onSelected: (selected) =>
+                    context.read<TaskFormCubit>().toggleFollowedArtistsMode(),
+              ),
+            ],
           ),
-        )
       ],
+      ),
     );
   }
 
