@@ -122,6 +122,13 @@ class MyApp extends StatelessWidget {
         routerConfig: router,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Color(0xFF60A5FA),
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+        ),
       ),
     );
   }
