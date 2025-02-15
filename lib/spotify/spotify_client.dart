@@ -152,5 +152,5 @@ class SpotifyClient extends BaseHttpClient {
                   .toList(),
             )))
         .then((responses) => responses.expand((element) => element).toList());
-  }            
+  }
 }
